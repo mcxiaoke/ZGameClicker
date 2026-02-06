@@ -1,0 +1,81 @@
+# Auto-generated config for yggdra
+# You can edit 'name', 'desc', 'type', 'click'. Do not change keys.
+ASSETS = {
+    "action_count.png": {
+        "name": "行动次数",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "area_clear.png": {
+        "name": "Area Clear",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "award_text.png": {
+        "name": "Award Text",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "back.png": {"name": "返回", "desc": "", "type": "button", "click": "single"},
+    "battle_again.png": {
+        "name": "Battle Again",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "battle_prepare.png": {
+        "name": "Battle Prepare",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "battle_start.png": {
+        "name": "Battle Start",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "body.png": {"name": "身体图像", "desc": "", "type": "button", "click": "single"},
+    "cancel.png": {"name": "Cancel", "desc": "", "type": "button", "click": "single"},
+    "change_team.png": {
+        "name": "Change Team",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "chapter_arrow.png": {
+        "name": "Chapter Arrow",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "click_close.png": {
+        "name": "Click Close",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "close.png": {"name": "Close", "desc": "", "type": "button", "click": "single"},
+    "head.png": {"name": "Head", "desc": "", "type": "button", "click": "single"},
+    "my_team.png": {"name": "My Team", "desc": "", "type": "button", "click": "single"},
+    "new_content.png": {
+        "name": "New Content",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "next_chapter.png": {
+        "name": "Next Chapter",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "ok.png": {"name": "好的", "desc": "", "type": "button", "click": "single"},
+    "skip.png": {"name": "Skip", "desc": "", "type": "button", "click": "single"},
+    "stars.png": {"name": "Stars", "desc": "", "type": "button", "click": "single"},
+    "wave.png": {"name": "Wave", "desc": "", "type": "button", "click": "single"},
+    "win.png": {"name": "Win", "desc": "", "type": "button", "click": "single"},
+}
