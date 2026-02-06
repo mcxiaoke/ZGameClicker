@@ -13,7 +13,7 @@ WINDOW_TITLE = "YGGDRA"
 CURRENT_SCALE = 0.8
 
 # 匹配置信度阈值
-CONFIDENCE = 0.85
+CONFIDENCE = 0.4
 
 # 待检查的图片列表
 BUTTONS = [
@@ -25,6 +25,11 @@ BUTTONS = [
     "back.png",
     "skip.png",
     "ok.png",
+    "open_battle_a.png",
+    "open_battle_b.png",
+    "area_clear.png",
+    "new_content.png",
+    "click_close.png",
     "cancel.png",
 ]
 
@@ -33,6 +38,10 @@ CLICK_BUTTONS = [
     "next_chapter.png",
     "battle_start.png",
     "ok.png",
+    "open_battle_a.png",
+    "open_battle_b.png",
+    "area_clear.png",
+    "new_content.png",
     "click_close.png",
     "skip2.png",
 ]
@@ -47,5 +56,7 @@ SEARCH_REGIONS = {
     "back.png": (1134, 1408, 318, 266),
     "ok.png": (1482, 867, 316, 267),
     "click_close.png": (1040, 1329, 491, 262),
+    "area_clear.png": (784, 608, 1012, 347),
+    "new_content.png": (1090, 568, 403, 250),
     "skip2.png": (2174, 6, 311, 328),
 }

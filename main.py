@@ -90,8 +90,8 @@ def find_scaled_with_region(image_name, win_rect):
         print("-" * 40)
         
         # 测试模式注释点击
-        pyautogui.moveTo(abs_center_x, abs_center_y)
-        pyautogui.doubleClick(abs_center_x, abs_center_y)
+        pyautogui.moveTo(abs_center_x, abs_center_y, duration=0.5)
+        pyautogui.click(abs_center_x, abs_center_y)
         print(f"[点击按钮] ===>>> {image_name}")
         return True
     
