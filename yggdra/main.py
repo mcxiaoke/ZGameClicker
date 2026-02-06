@@ -9,6 +9,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from core.controller import GameController
 import config
 
+DEBUG_MODE = False
+
 
 class YggdraBot:
     def __init__(self):
@@ -31,7 +33,10 @@ class YggdraBot:
                     continue
 
                 frame_count += 1
-                results = self.bot.find_all(screen, config.BUTTONS, 0.3)
+                if DEBUG_MODE:
+                    results = self.bot.find_all(screen, config.BUTTONS, 0.6)
+                    for r in results:
+                        print(f"FOUND {r['name']} {r['confidence']:.2f}")
 
                 # --- 第二步：逻辑判断链 (基于同一张截图查找多个目标) ---
                 res = self.bot.find(screen, "battle_prepare.png")
@@ -97,15 +102,15 @@ class YggdraBot:
                 action_count = self.bot.find(screen, "action_count.png.png")
 
                 if not (wave or action_count):
-                    skip = self.bot.find(screen, "skip.png")
-                    if skip:
-                        print(f"[逻辑] 跳过剧情，点击跳过")
-                        self.bot.click(skip)
-                        continue
                     ok = self.bot.find(screen, "ok.png")
                     if ok:
                         print(f"[逻辑] 跳过剧情，点击好的")
                         self.bot.click(ok)
+                        continue
+                    skip = self.bot.find(screen, "skip.png")
+                    if skip:
+                        print(f"[逻辑] 跳过剧情，点击跳过")
+                        self.bot.click(skip)
                         continue
 
                 # --- 如果什么都没找到 ---

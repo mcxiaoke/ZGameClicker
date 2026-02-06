@@ -13,6 +13,7 @@ import cv2
 import time
 import os
 import mss
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # 只有当你确认需要 BitBlt 时才取消注释下面的导入，防止报错
 try:
@@ -24,27 +25,7 @@ except ImportError:
 
 from .window import WindowManager
 from .vision import VisionEngine
-
-
-class ScopeTimer:
-    def __init__(self, name, threshold=0.01):
-        """
-        :param name: 计时块名称
-        :param threshold: 只有超过这个时间(秒)才打印，防止刷屏
-        """
-        self.name = name
-        self.threshold = threshold
-        self.start = 0
-
-    def __enter__(self):
-        self.start = time.perf_counter()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        cost = time.perf_counter() - self.start
-        if cost > self.threshold:
-            print(f"[Perf] {self.name}: {cost:.4f}s")
-            pass
+from .helper import ScopeTimer
 
 
 class GameController:
@@ -65,6 +46,11 @@ class GameController:
         self.sct = None
         if self.method == self.METHOD_MSS:
             self.sct = mss.mss()
+        self.executor = ThreadPoolExecutor(max_workers=8)
+
+    def __del__(self):
+        if hasattr(self, "executor"):
+            self.executor.shutdown(wait=False)
 
     def set_regions(self, regions_dict):
         self.regions = regions_dict
@@ -155,7 +141,6 @@ class GameController:
             self.vision.confidence = original_conf
 
         if found:
-            # print(f"FOUND {image_name} {val:.2f}")
             # 1. 计算相对于窗口的坐标
             win_rel_x = center[0] + offset_x
             win_rel_y = center[1] + offset_y
@@ -193,63 +178,42 @@ class GameController:
             return {"name": image_name, "pos": (abs_x, abs_y), "confidence": val}
         return None
 
-    # find_all, find_best, click 保持不变
-    def find_all(self, screen_img, image_names, threshold=None):
+    def find_all(self, screen_img, image_names, threshold=None, method="color"):
+        """
+        [感知] 并行查找，大幅提升批量识别速度
+        """
         results = []
         if screen_img is None:
             return results
 
-        total = len(image_names)
-        for i, name in enumerate(image_names):
-            # --- 调试打印 ---
-            # print(f"Checking {i+1}/{total}: {name} ...")
+        # 使用线程池并发执行 find 任务
+        # 我们把每个 find 任务提交给线程池
+        futures = {
+            self.executor.submit(self.find, screen_img, name, threshold, method): name
+            for name in image_names
+        }
 
-            res = self.find(screen_img, name, threshold)
-            if res:
-                results.append(res)
+        with ScopeTimer(f"find_all", 0.05):
+            for future in as_completed(futures):
+                try:
+                    res = future.result()
+                    if res:
+                        results.append(res)
+                except Exception as e:
+                    name = futures[future]
+                    print(f"[Thread Error] {name} matching failed: {e}")
 
         return results
 
-    def find_best(self, screen_img, image_names, threshold=None):
+    def find_best(self, screen_img, image_names, threshold=None, method="color"):
         """
-        [感知] 批量查找，只返回置信度最高的那一个
-        :return: dictResult or None
+        [感知] 并行查找，只返回置信度最高的那一个
         """
-        results = self.find_all(screen_img, image_names, threshold)
+        # 复用已经多线程化的 find_all
+        results = self.find_all(screen_img, image_names, threshold, method)
         if not results:
             return None
-
-        # 按 confidence 降序排列，取第一个
-        # x['confidence'] 即取出置信度
         return max(results, key=lambda x: x["confidence"])
-        if screen_img is None:
-            return None
-        rel_conf = self.regions.get(image_name)
-        search_img = screen_img
-        offset_x, offset_y = 0, 0
-        if rel_conf:
-            rx, ry, rw, rh = rel_conf
-            sh, sw = screen_img.shape[:2]
-            if rx + rw <= sw and ry + rh <= sh:
-                search_img = screen_img[ry : ry + rh, rx : rx + rw]
-                offset_x, offset_y = rx, ry
-        tpl_path = os.path.join(self.assets_dir, image_name)
-        template_img = self.vision.load_template(tpl_path)
-        if template_img is None:
-            return None
-        original_conf = self.vision.confidence
-        if threshold:
-            self.vision.confidence = threshold
-        found, val, center, dims = self.vision.match(search_img, template_img)
-        if threshold:
-            self.vision.confidence = original_conf
-        if found:
-            win_rel_x = center[0] + offset_x
-            win_rel_y = center[1] + offset_y
-            if self.last_win_rect:
-                win_left, win_top, _, _ = self.last_win_rect
-                return (win_left + win_rel_x, win_top + win_rel_y)
-        return None
 
     def click(self, res, offset=(0, 0)):
         if not res:
