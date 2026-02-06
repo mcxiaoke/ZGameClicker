@@ -65,6 +65,7 @@ def find_scaled_with_region(image_name, win_rect):
 
     res = cv2.matchTemplate(screen_cv, template, cv2.TM_CCOEFF_NORMED)
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
+    # print(f"\n[匹配图片] {image_name} | 置信度: {max_val:.2f}")
 
     if max_val >= config.CONFIDENCE:
         # 计算在屏幕上的绝对中心点
@@ -89,20 +90,27 @@ def find_scaled_with_region(image_name, win_rect):
         print("-" * 40)
         
         # 测试模式注释点击
-        # pyautogui.click(abs_center_x, abs_center_y)
+        pyautogui.moveTo(abs_center_x, abs_center_y)
+        pyautogui.doubleClick(abs_center_x, abs_center_y)
+        print(f"[点击按钮] ===>>> {image_name}")
         return True
     
     return False
 
 if __name__ == "__main__":
     print(f"=== 自动 Region 生成版脚本 ===")
-    
+    time.sleep(3)
+    rect = get_window_rect(config.WINDOW_TITLE)
+    print(f"\n[匹配窗口] {rect}")
     try:
         while True:
             rect = get_window_rect(config.WINDOW_TITLE)
             if rect:
-                for btn in config.BUTTONS:
-                    find_scaled_with_region(btn, rect)
+                for btn in config.CLICK_BUTTONS:
+                    matched = find_scaled_with_region(btn, rect)
+                    if matched:
+                        break
+                        
             time.sleep(1)
     except KeyboardInterrupt:
         print("\n脚本停止")
