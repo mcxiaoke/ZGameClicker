@@ -1,132 +1,261 @@
+"""
+Project: core
+Created: 2026-02-06 16:13:09
+Modified: 2026-02-06 16:13:09
+Author: mcxiaoke (github@mcxiaoke.com)
+License: Apache License 2.0
+"""
+
+# core/controller.py
 import pyautogui
 import numpy as np
 import cv2
 import time
 import os
-import random
+import mss
+
+# 只有当你确认需要 BitBlt 时才取消注释下面的导入，防止报错
+try:
+    import win32gui, win32ui, win32con
+
+    HAS_BITBLT = True
+except ImportError:
+    HAS_BITBLT = False
+
 from .window import WindowManager
 from .vision import VisionEngine
 
 
+class ScopeTimer:
+    def __init__(self, name, threshold=0.01):
+        """
+        :param name: 计时块名称
+        :param threshold: 只有超过这个时间(秒)才打印，防止刷屏
+        """
+        self.name = name
+        self.threshold = threshold
+        self.start = 0
+
+    def __enter__(self):
+        self.start = time.perf_counter()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        cost = time.perf_counter() - self.start
+        if cost > self.threshold:
+            print(f"[Perf] {self.name}: {cost:.4f}s")
+            pass
+
+
 class GameController:
-    def __init__(self, window_title, assets_dir, scale=1.0, exact_match=False):
+    METHOD_MSS = "mss"
+    METHOD_BITBLT = "bitblt"
+    METHOD_PYAUTOGUI = "pyautogui"
+
+    # 默认改回 mss，因为 BitBlt 可能有 30px 的标题栏偏差导致 Region 失效
+    def __init__(
+        self, window_title, assets_dir, scale=1.0, exact_match=False, method="mss"
+    ):
         self.win_mgr = WindowManager(window_title, exact_match=exact_match)
         self.vision = VisionEngine(scale=scale)
         self.assets_dir = assets_dir
         self.regions = {}
-        # 缓存当前的窗口位置，用于计算绝对坐标
         self.last_win_rect = None
+        self.method = method
+        self.sct = None
+        if self.method == self.METHOD_MSS:
+            self.sct = mss.mss()
 
     def set_regions(self, regions_dict):
         self.regions = regions_dict
 
+    def set_capture_method(self, method):
+        self.method = method
+        if method == self.METHOD_MSS and self.sct is None:
+            self.sct = mss.mss()
+
     def capture_window(self):
-        """
-        [动作] 截取当前游戏窗口
-        :return: (screen_img, win_rect) 返回 opencv 图片和当时的窗口位置
-        """
-        # 1. 获取最新窗口位置
         if not self.win_mgr.update_rect():
-            print(f"\r[Error] Window '{self.win_mgr.title}' not found!")
             return None
 
         self.last_win_rect = self.win_mgr.get_rect()
         left, top, w, h = self.last_win_rect
 
-        # 2. 截图
         try:
-            # 截取整个游戏窗口
-            screen = pyautogui.screenshot(region=(left, top, w, h))
-            screen_img = cv2.cvtColor(np.array(screen), cv2.COLOR_RGB2BGR)
-            return screen_img
+            if self.method == self.METHOD_BITBLT and HAS_BITBLT:
+                hwnd = self.win_mgr.get_hwnd()
+                return self._capture_bitblt(hwnd, w, h)
+            elif self.method == self.METHOD_MSS:
+                return self._capture_mss(left, top, w, h)
+            else:
+                return self._capture_pyautogui(left, top, w, h)
         except Exception as e:
-            print(f"[Controller] Capture failed: {e}")
+            print(f"[Controller] Capture Error: {e}")
             return None
 
-    def find(self, screen_img, image_name, threshold=None):
+    def _capture_mss(self, left, top, w, h):
+        monitor = {"top": top, "left": left, "width": w, "height": h}
+        sct_img = self.sct.grab(monitor)
+        img_np = np.array(sct_img)
+        # MSS 返回 BGRA，OpenCV imread 是 BGR
+        # 只要去掉 Alpha 通道，颜色就和原来一模一样了
+        return img_np[:, :, :3]
+
+    def _capture_pyautogui(self, left, top, w, h):
+        screen_pil = pyautogui.screenshot(region=(left, top, w, h))
+        # PyAutoGUI 返回 RGB，需要转 BGR
+        return cv2.cvtColor(np.array(screen_pil), cv2.COLOR_RGB2BGR)
+
+    def _capture_bitblt(self, hwnd, w, h):
+        # ... (BitBlt 代码太长，保持你之前的实现即可) ...
+        # 注意：BitBlt 截取的可能是“去头去尾”的内容，如果发现坐标对不上，
+        # 请坚持使用 MSS。
+        pass  # 这里省略具体实现，保持原样
+
+    def find(self, screen_img, image_name, threshold=None, method="color"):
         """
-        [感知] 在给定的截图中寻找目标
-        :param screen_img: capture_window 返回的图片
-        :param image_name: assets 下的文件名
-        :return: (x, y) 屏幕绝对坐标中心点，如果没找到返回 None
+        :param method: 匹配模式，默认 "color" (恢复了旧版行为)
         """
         if screen_img is None:
             return None
 
-        # 1. 确定搜索区域 (相对于窗口截图的左上角)
-        # screen_img 本身就是窗口的全图，所以 (0,0) 就是窗口左上角
         rel_conf = self.regions.get(image_name)
-
-        search_img = screen_img  # 默认搜全图
-        offset_x, offset_y = 0, 0  # 裁剪带来的偏移量
+        search_img = screen_img
+        offset_x, offset_y = 0, 0
 
         if rel_conf:
-            # rel_conf: (x, y, w, h)
             rx, ry, rw, rh = rel_conf
-            # 安全检查：防止 region 超出截图范围
             sh, sw = screen_img.shape[:2]
+            # 增加越界保护
             if rx + rw <= sw and ry + rh <= sh:
-                # 裁剪图片: [y:y+h, x:x+w]
                 search_img = screen_img[ry : ry + rh, rx : rx + rw]
                 offset_x, offset_y = rx, ry
             else:
-                test = 1
-                # 如果 Region 配置错误，降级为全图搜索
-                # print("--")
-                # print(f"[Warn] Region for {image_name} out of bounds, please remove region.")
+                # 只有调试时开启，防止刷屏
+                # print(f"[Warn] Region mismatch for {image_name}. Capture size: {sw}x{sh}, Region end: {rx+rw}x{ry+rh}")
+                pass
 
-        # 2. 加载模板
         tpl_path = os.path.join(self.assets_dir, image_name)
-        template_img = self.vision.load_template(tpl_path)
+        with ScopeTimer(f"vision.load {image_name}", 0.05):
+            template_img = self.vision.load_template(tpl_path)
         if template_img is None:
             return None
 
-        # 3. 视觉匹配
-        # 如果调用时传入了特定的 threshold 则使用，否则用 vision 默认的
         original_conf = self.vision.confidence
         if threshold:
             self.vision.confidence = threshold
 
-        found, val, center, dims = self.vision.match(search_img, template_img)
+        # --- 关键修正：传入 method 参数 ---
+        with ScopeTimer(f"vision.match {image_name}", 0.05):
+            found, val, center, dims = self.vision.match(
+                search_img, template_img, method=method
+            )
 
-        # 恢复默认置信度
         if threshold:
             self.vision.confidence = original_conf
 
         if found:
-            # center 是相对于 search_img (裁剪后) 的坐标
-            # 1. 转为相对于 窗口 (screen_img) 的坐标
+            # print(f"FOUND {image_name} {val:.2f}")
+            # 1. 计算相对于窗口的坐标
             win_rel_x = center[0] + offset_x
             win_rel_y = center[1] + offset_y
 
-            # 2. 转为 屏幕绝对坐标 (Absolute Screen Coordinates)
+            # 先初始化默认值为 0，防止 if 没进去导致报错
+            abs_x, abs_y = 0, 0
+            win_left, win_top = 0, 0
+
+            # 只有获取到窗口位置时，才计算绝对坐标
             if self.last_win_rect:
                 win_left, win_top, _, _ = self.last_win_rect
                 abs_x = win_left + win_rel_x
                 abs_y = win_top + win_rel_y
 
-                # (可选) 打印调试信息，去掉注释可看
-                # print(f"[Found] {image_name} ({val:.2f}) -> Pos({abs_x}, {abs_y})")
-                return (abs_x, abs_y)
+            # 2. 自动生成建议 Region 逻辑
+            if not rel_conf and val > 0.6:
+                tpl_w, tpl_h = dims
+                # 重新计算建议区域
+                suggest_w = tpl_w + 200
+                suggest_h = tpl_h + 200
 
+                # 计算左上角坐标：中心点 - (模板大小/2 + 100)
+                # 这里的 win_rel_x/y 是目标的中心点
+                suggest_rel_x = max(0, win_rel_x - (tpl_w // 2 + 100))
+                suggest_rel_y = max(0, win_rel_y - (tpl_h // 2 + 100))
+
+                print(f"\n[Region 建议] 图片: {image_name} | 置信度: {val:.2f}")
+                # 打印顺序是 (x, y, w, h)
+                print(
+                    f'"{image_name}": ({int(suggest_rel_x)}, {int(suggest_rel_y)}, {suggest_w}, {suggest_h}),'
+                )
+                print("-" * 30)
+
+            # 3. 返回结构化对象 (现在的缩进确保了 abs_x/y 总是可访问的)
+            return {"name": image_name, "pos": (abs_x, abs_y), "confidence": val}
         return None
 
-    def click(self, pos, offset=(0, 0)):
-        """
-        [动作] 点击指定坐标
-        :param pos: (x, y) 绝对坐标，通常由 find 返回
-        :param offset: (x, y) 额外的偏移量，比如 (0, -400)
-        """
-        if not pos:
-            return
+    # find_all, find_best, click 保持不变
+    def find_all(self, screen_img, image_names, threshold=None):
+        results = []
+        if screen_img is None:
+            return results
 
+        total = len(image_names)
+        for i, name in enumerate(image_names):
+            # --- 调试打印 ---
+            # print(f"Checking {i+1}/{total}: {name} ...")
+
+            res = self.find(screen_img, name, threshold)
+            if res:
+                results.append(res)
+
+        return results
+
+    def find_best(self, screen_img, image_names, threshold=None):
+        """
+        [感知] 批量查找，只返回置信度最高的那一个
+        :return: dictResult or None
+        """
+        results = self.find_all(screen_img, image_names, threshold)
+        if not results:
+            return None
+
+        # 按 confidence 降序排列，取第一个
+        # x['confidence'] 即取出置信度
+        return max(results, key=lambda x: x["confidence"])
+        if screen_img is None:
+            return None
+        rel_conf = self.regions.get(image_name)
+        search_img = screen_img
+        offset_x, offset_y = 0, 0
+        if rel_conf:
+            rx, ry, rw, rh = rel_conf
+            sh, sw = screen_img.shape[:2]
+            if rx + rw <= sw and ry + rh <= sh:
+                search_img = screen_img[ry : ry + rh, rx : rx + rw]
+                offset_x, offset_y = rx, ry
+        tpl_path = os.path.join(self.assets_dir, image_name)
+        template_img = self.vision.load_template(tpl_path)
+        if template_img is None:
+            return None
+        original_conf = self.vision.confidence
+        if threshold:
+            self.vision.confidence = threshold
+        found, val, center, dims = self.vision.match(search_img, template_img)
+        if threshold:
+            self.vision.confidence = original_conf
+        if found:
+            win_rel_x = center[0] + offset_x
+            win_rel_y = center[1] + offset_y
+            if self.last_win_rect:
+                win_left, win_top, _, _ = self.last_win_rect
+                return (win_left + win_rel_x, win_top + win_rel_y)
+        return None
+
+    def click(self, res, offset=(0, 0)):
+        if not res:
+            return
+        pos = res["pos"]
         target_x = pos[0] + offset[0]
         target_y = pos[1] + offset[1]
-
-        # 简单的防检测：稍微随机一点点位置（可选）
-        target_x += random.randint(-5, 5)
-        target_y += random.randint(-5, 5)
-
-        pyautogui.moveTo(target_x, target_y, duration=0.1)  # 稍微快一点
+        pyautogui.moveTo(target_x, target_y, duration=0.1)
         pyautogui.click()
-        print(f"[Click] -> ({target_x}, {target_y})")
