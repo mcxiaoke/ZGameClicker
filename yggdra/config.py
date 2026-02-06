@@ -66,7 +66,8 @@ CLICK_BUTTONS = [
 ]
 
 # 窗口内相对区域配置 (x_offset, y_offset, width, height)
-REGIONS = {
+# 长宽各加200
+REGIONS_OLD = {
     "chapter_arrow.png": (52, 6, 429, 268),
     "head.png": (892, 754, 323, 320),
     "body.png": (175, 786, 301, 392),
@@ -85,4 +86,26 @@ REGIONS = {
     "cancel.png": (798, 873, 312, 264),
     "area_clear.png": (784, 608, 1012, 347),
     "new_content.png": (1090, 568, 403, 250),
+}
+
+# 长宽各加100
+REGIONS = {
+    "chapter_arrow.png": (102, 56, 329, 168),
+    "head.png": (942, 804, 223, 220),
+    "body.png": (225, 836, 201, 292),
+    "stars.png": (1148, 948, 291, 163),
+    "battle_prepare.png": (1405, 1257, 326, 168),
+    "battle_start.png": (2094, 1369, 276, 222),
+    "battle_again.png": (643, 1458, 315, 161),
+    "my_team.png": (533, 1195, 293, 152),
+    "change_team.png": (233, 64, 293, 156),
+    "action_count.png": (1158, 50, 269, 143),
+    "wave.png": (194, 52, 216, 134),
+    "next_chapter.png": (1580, 1447, 396, 179),
+    "win.png": (978, 112, 628, 309),
+    "skip.png": (2224, 56, 211, 228),
+    "ok.png": (1532, 917, 216, 167),
+    "cancel.png": (848, 923, 212, 164),
+    "area_clear.png": (834, 658, 912, 247),
+    "new_content.png": (1140, 618, 303, 150),
 }

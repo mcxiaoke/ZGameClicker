@@ -173,14 +173,14 @@ class GameController:
             # 2. 自动生成建议 Region 逻辑
             if not rel_conf and val > 0.6:
                 tpl_w, tpl_h = dims
-                # 重新计算建议区域
-                suggest_w = tpl_w + 200
-                suggest_h = tpl_h + 200
+                # 宽度和高度改为只增加 100
+                suggest_w = tpl_w + 100
+                suggest_h = tpl_h + 100
 
-                # 计算左上角坐标：中心点 - (模板大小/2 + 100)
-                # 这里的 win_rel_x/y 是目标的中心点
-                suggest_rel_x = max(0, win_rel_x - (tpl_w // 2 + 100))
-                suggest_rel_y = max(0, win_rel_y - (tpl_h // 2 + 100))
+                # 计算左上角坐标：中心点 - (模板大小/2 + 50)
+                # 这样正好能让 search_region 居中包裹住模板
+                suggest_rel_x = max(0, win_rel_x - (tpl_w // 2 + 50))
+                suggest_rel_y = max(0, win_rel_y - (tpl_h // 2 + 50))
 
                 print(f"\n[Region 建议] 图片: {image_name} | 置信度: {val:.2f}")
                 # 打印顺序是 (x, y, w, h)

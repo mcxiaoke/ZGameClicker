@@ -40,6 +40,13 @@ class YggdraBot:
                     self.bot.click(res)
                     continue
 
+                # 点击开始
+                res = self.bot.find(screen, "battle_start.png")
+                if res:
+                    print(f"[逻辑] 战斗开始")
+                    self.bot.click(res)
+                    continue
+
                 # 下一章 (优先级低于战斗准备)
                 res = self.bot.find(screen, "next_chapter.png")
                 if res:
@@ -50,13 +57,6 @@ class YggdraBot:
                 res = self.bot.find(screen, "battle_again.png")
                 if res:
                     print(f"[逻辑] 再次战斗")
-                    self.bot.click(res)
-                    continue
-
-                # 点击开始
-                res = self.bot.find(screen, "battle_start.png")
-                if res:
-                    print(f"[逻辑] 战斗开始")
                     self.bot.click(res)
                     continue
 
