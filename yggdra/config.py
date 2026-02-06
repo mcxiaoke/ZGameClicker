@@ -1,16 +1,18 @@
-'''
+"""
 Project: GameClicker
 Created: 2026-02-06 12:06:51
 Modified: 2026-02-06 12:06:51
 Author: mcxiaoke (github@mcxiaoke.com)
 License: Apache License 2.0
-'''
+"""
 
 # 游戏窗口标题
-WINDOW_TITLE = "YGGDRA"
+WINDOW_TITLE = "YGGDRA REFRAIN"
+
+ASSETS_DIR = "assets/yggdra"
 
 # 缩放倍率
-CURRENT_SCALE = 0.8
+SCALE = 0.8
 
 # 匹配置信度阈值
 CONFIDENCE = 0.85
@@ -21,7 +23,7 @@ BUTTONS = [
     "next_chapter.png",
     "battle_start.png",
     "close.png",
-    "again.png",
+    "battle_again.png",
     "back.png",
     "skip.png",
     "ok.png",
@@ -54,6 +56,7 @@ CLICK_BUTTONS = [
     "new_content.png",
     "click_close.png",
     "skip.png",
+    "battle_again.png",
     # "chapter_arrow.png",
     # "change_team.png",
     # "my_team.png",
@@ -62,10 +65,10 @@ CLICK_BUTTONS = [
 ]
 
 # 窗口内相对区域配置 (x_offset, y_offset, width, height)
-SEARCH_REGIONS = {
+REGIONS = {
     "battle_prepare.png": (1355, 1207, 426, 268),
     "next_chapter.png": (1530, 1397, 496, 279),
-    "battle_start.png":(2044, 1319, 376, 322),
+    "battle_start.png": (2044, 1319, 376, 322),
     "close.png": (1978, 1212, 318, 264),
     "again.png": (593, 1408, 415, 261),
     "back.png": (1134, 1408, 318, 266),
