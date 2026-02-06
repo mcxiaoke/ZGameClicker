@@ -7,9 +7,10 @@ sys.path.append(".")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.controller import GameController
+from assets_config import ASSETS
 import config
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 
 class YggdraBot:
@@ -18,12 +19,18 @@ class YggdraBot:
             config.WINDOW_TITLE, config.ASSETS_DIR, scale=config.SCALE, exact_match=True
         )
         self.bot.set_regions(config.REGIONS)
+        # 预加载所有要查找的文件名列表 (排除 404 的)
+        self.targets = [k for k, v in ASSETS.items() if "(404)" not in v["desc"]]
+        for k, v in ASSETS.items():
+            print(k, v)
 
     def run(self):
         print(f"Bot started for {config.WINDOW_TITLE}. Press Ctrl+C to stop.")
         frame_count = 0
         try:
             while True:
+                # 操作之间间隔时间，防止重复点击
+                time.sleep(1.5)
                 # --- 第一步：获取当前帧 (截图 1 次) ---
                 screen = self.bot.capture_window()
 
@@ -34,11 +41,43 @@ class YggdraBot:
 
                 frame_count += 1
                 if DEBUG_MODE:
-                    results = self.bot.find_all(screen, config.BUTTONS, 0.6)
+                    results = self.bot.find_all(screen, self.targets, 0.5)
                     for r in results:
                         print(f"FOUND {r['name']} {r['confidence']:.2f}")
 
-                # --- 第二步：逻辑判断链 (基于同一张截图查找多个目标) ---
+                # 1. 查找所有目标
+                # results = self.bot.find_all(screen, self.targets)
+
+                # 2. 建立映射并注入配置信息
+                # res_map = {}
+                # for item in results:
+                #     filename = item["name"]  # 这里的 name 是文件名
+                #     asset = ASSETS.get(filename)
+
+                #     if asset:
+                #         # [关键] 把配置里的中文 name 注入到结果对象里，供 controller 打印日志用
+                #         item["alias"] = asset["name"]
+                #         item["desc"] = asset["desc"]
+                #         item["click_type"] = asset["click"]
+                #         item["type"] = asset["type"]
+
+                #     res_map[filename] = item
+
+                # 3. 逻辑决策 (直接用 filename 做 key，方便索引)
+
+                # 示例：处理 "battle_prepare.png"
+                # if "battle_prepare.png" in res_map:
+                #     btn = res_map["battle_prepare.png"]
+                #     # 日志会自动打印: [Action] Click -> Battle Prepare @ (x, y)
+                #     self.bot.click(btn)
+                #     continue
+
+                # 示例：通用处理所有类型为 'button' 的点击 (如果逻辑简单的话)
+                # for fname, item in res_map.items():
+                #     if item.get('type') == 'button' and item.get('click_type') == 'single':
+                #          self.bot.click(item)
+                #          break
+
                 res = self.bot.find(screen, "battle_prepare.png")
                 if res:
                     print(f"[逻辑] 发现战斗准备，点击开始")
@@ -115,7 +154,6 @@ class YggdraBot:
 
                 # --- 如果什么都没找到 ---
                 # print("\r......", end="")
-                time.sleep(1)  # 降低循环频率，省 CPU
 
         except KeyboardInterrupt:
             print("\nBot stopped.")

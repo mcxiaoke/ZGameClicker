@@ -215,11 +215,40 @@ class GameController:
             return None
         return max(results, key=lambda x: x["confidence"])
 
-    def click(self, res, offset=(0, 0)):
-        if not res:
+    def click(self, target, offset=(0, 0)):
+        """
+        [动作] 点击目标
+        :param target: 可以是 find() 返回的结果对象，或者是 assets_config 中的配置项(需包含 pos)
+        """
+        if not target:
             return
-        pos = res["pos"]
+
+        pos = None
+        log_name = "Unknown Target"
+
+        # case 1: target 是 find/find_all 返回的结果字典 {'name':..., 'pos':...}
+        if isinstance(target, dict):
+            if "pos" in target:
+                pos = target["pos"]
+            # 尝试获取用于显示的名字
+            if "alias" in target:  # 如果我们在 main 里注入了 alias
+                log_name = target["alias"]
+            elif "name" in target:  # 文件名
+                log_name = target["name"]
+
+        # case 2: target 是纯坐标
+        elif isinstance(target, (tuple, list)):
+            pos = target
+            log_name = f"Pos{pos}"
+
+        if not pos:
+            return
+
         target_x = pos[0] + offset[0]
         target_y = pos[1] + offset[1]
+
+        # 打印人性化日志
+        print(f"[Action] Click -> {log_name} @ ({target_x}, {target_y})")
+
         pyautogui.moveTo(target_x, target_y, duration=0.1)
         pyautogui.click()

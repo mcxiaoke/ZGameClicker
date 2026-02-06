@@ -4,7 +4,7 @@ ASSETS = {
     "action_count.png": {
         "name": "行动次数",
         "desc": "",
-        "type": "button",
+        "type": "label",
         "click": "single",
     },
     "area_clear.png": {
@@ -60,7 +60,7 @@ ASSETS = {
     },
     "close.png": {"name": "Close", "desc": "", "type": "button", "click": "single"},
     "head.png": {"name": "Head", "desc": "", "type": "button", "click": "single"},
-    "my_team.png": {"name": "My Team", "desc": "", "type": "button", "click": "single"},
+    "my_team.png": {"name": "My Team", "desc": "", "type": "label", "click": "single"},
     "new_content.png": {
         "name": "New Content",
         "desc": "",

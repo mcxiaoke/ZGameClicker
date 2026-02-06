@@ -17,54 +17,6 @@ SCALE = 0.8
 # 匹配置信度阈值
 CONFIDENCE = 0.9
 
-# 待检查的图片列表
-BUTTONS = [
-    "battle_prepare.png",
-    "next_chapter.png",
-    "battle_start.png",
-    "close.png",
-    "battle_again.png",
-    "back.png",
-    "skip.png",
-    "ok.png",
-    "stars.png",
-    "area_clear.png",
-    "new_content.png",
-    "click_close.png",
-    "cancel.png",
-    "action_count.png",
-    "wave.png",
-    "head.png",
-    "body.png",
-    "chapter_arrow.png",
-    "change_team.png",
-    "my_team.png",
-    "award_text.png",
-    "win.png",
-]
-
-CLICK_BUTTONS = [
-    "battle_prepare.png",
-    "next_chapter.png",
-    "battle_start.png",
-    "ok.png",
-    "stars.png",
-    # "action_count.png",
-    # "wave.png",
-    "head.png",
-    "body.png",
-    "area_clear.png",
-    "new_content.png",
-    "click_close.png",
-    "skip.png",
-    "battle_again.png",
-    # "chapter_arrow.png",
-    # "change_team.png",
-    # "my_team.png",
-    # "award_text.png",
-    # "win.png",
-]
-
 # 窗口内相对区域配置 (x_offset, y_offset, width, height)
 # 长宽各加200
 REGIONS_OLD = {
@@ -91,8 +43,9 @@ REGIONS_OLD = {
 # 长宽各加100
 REGIONS = {
     "chapter_arrow.png": (102, 56, 329, 168),
-    "head.png": (942, 804, 223, 220),
-    "body.png": (225, 836, 201, 292),
+    # 角色横向位置不固定，可移动，所以放宽限制
+    "head.png": (225, 804, 1800, 220),
+    "body.png": (225, 836, 1800, 292),
     "stars.png": (1148, 948, 291, 163),
     "battle_prepare.png": (1405, 1257, 326, 168),
     "battle_start.png": (2094, 1369, 276, 222),
