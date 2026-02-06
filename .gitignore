@@ -8,7 +8,6 @@ wheels/
 test/
 tmp/
 out/
-assets/
 
 # Virtual environments
 .venv
