@@ -13,7 +13,7 @@ WINDOW_TITLE = "YGGDRA"
 CURRENT_SCALE = 0.8
 
 # 匹配置信度阈值
-CONFIDENCE = 0.4
+CONFIDENCE = 0.85
 
 # 待检查的图片列表
 BUTTONS = [
@@ -25,12 +25,20 @@ BUTTONS = [
     "back.png",
     "skip.png",
     "ok.png",
-    "open_battle_a.png",
-    "open_battle_b.png",
+    "stars.png",
     "area_clear.png",
     "new_content.png",
     "click_close.png",
     "cancel.png",
+    "action_count.png",
+    "wave.png",
+    "head.png",
+    "chapter_arrow.png",
+    "chapter_icon.png",
+    "change_team.png",
+    "my_team.png",
+    "award_text.png",
+    "win.png",
 ]
 
 CLICK_BUTTONS = [
@@ -38,12 +46,19 @@ CLICK_BUTTONS = [
     "next_chapter.png",
     "battle_start.png",
     "ok.png",
-    "open_battle_a.png",
-    "open_battle_b.png",
+    "stars.png",
+    # "action_count.png",
+    # "wave.png",
+    "head.png",
     "area_clear.png",
     "new_content.png",
     "click_close.png",
-    "skip2.png",
+    "skip.png",
+    # "chapter_arrow.png",
+    # "change_team.png",
+    # "my_team.png",
+    # "award_text.png",
+    # "win.png",
 ]
 
 # 窗口内相对区域配置 (x_offset, y_offset, width, height)
@@ -58,5 +73,10 @@ SEARCH_REGIONS = {
     "click_close.png": (1040, 1329, 491, 262),
     "area_clear.png": (784, 608, 1012, 347),
     "new_content.png": (1090, 568, 403, 250),
-    "skip2.png": (2174, 6, 311, 328),
+    "skip.png": (2174, 6, 311, 328),
+    "chapter_arrow.png": (52, 6, 429, 268),
+    "award_text.png": (160, 1144, 444, 242),
+    "my_team.png": (483, 1145, 393, 252),
+    "change_team.png": (183, 14, 393, 256),
+    "win.png": (928, 62, 728, 409),
 }

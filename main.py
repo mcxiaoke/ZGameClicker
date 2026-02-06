@@ -90,8 +90,12 @@ def find_scaled_with_region(image_name, win_rect):
         print("-" * 40)
         
         # 测试模式注释点击
-        pyautogui.moveTo(abs_center_x, abs_center_y, duration=0.5)
-        pyautogui.click(abs_center_x, abs_center_y)
+        if image_name == "area_clear.png" or image_name == "new_content.png":
+            pyautogui.moveTo(abs_center_x, abs_center_y-400, duration=0.2)
+            pyautogui.click(abs_center_x, abs_center_y-400)
+        else:
+            pyautogui.moveTo(abs_center_x, abs_center_y, duration=0.2)
+            pyautogui.click(abs_center_x, abs_center_y)
         print(f"[点击按钮] ===>>> {image_name}")
         return True
     
@@ -109,8 +113,9 @@ if __name__ == "__main__":
                 for btn in config.CLICK_BUTTONS:
                     matched = find_scaled_with_region(btn, rect)
                     if matched:
+                        time.sleep(1)
                         break
                         
-            time.sleep(1)
+            time.sleep(0.5)
     except KeyboardInterrupt:
         print("\n脚本停止")
