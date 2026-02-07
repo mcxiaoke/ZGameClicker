@@ -63,4 +63,8 @@ REGIONS = {
     "award_text.png": (210, 1194, 344, 142),
     "area_clear.png": (834, 658, 912, 247),
     "new_content.png": (1140, 618, 303, 150),
+    "button_redeem.png": (1178, 1099, 228, 174),
+    "redeem_confirm.png": (1121, 378, 345, 168),
+    "redeem_place.png": (113, 60, 365, 164),
+    "label_max.png": (1630, 846, 212, 153),
 }

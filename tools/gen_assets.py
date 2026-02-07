@@ -9,6 +9,10 @@ License: Apache License 2.0
 import os
 import sys
 import ast
+
+sys.path.append(".")
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from core import log
 
 

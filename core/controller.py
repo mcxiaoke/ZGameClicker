@@ -42,6 +42,7 @@ class GameController:
         self.vision = VisionEngine(scale=scale)
         self.assets_dir = assets_dir
         self.regions = {}
+        self.disable_click = False
         self.last_win_rect = None
         self.method = method
         self.sct = None
@@ -55,6 +56,9 @@ class GameController:
 
     def set_regions(self, regions_dict):
         self.regions = regions_dict
+
+    def set_disable_click(self, disable):
+        self.disable_click = disable
 
     def set_capture_method(self, method):
         self.method = method
@@ -255,8 +259,11 @@ class GameController:
         target_x = pos[0] + offset[0]
         target_y = pos[1] + offset[1]
 
-        # 打印人性化日志
-        info(f"[Action] Click -> {log_name} @ ({target_x}, {target_y})")
+        if self.disable_click:
+            info(f"[DISABLED] Not Click -> {log_name}@({target_x}, {target_y})")
+            return
 
+        # 打印人性化日志
+        info(f"Click -> {log_name}@({target_x}, {target_y})")
         pyautogui.moveTo(target_x, target_y, duration=0.1)
         pyautogui.click()

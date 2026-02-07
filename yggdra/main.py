@@ -10,6 +10,11 @@ from assets_config import ASSETS
 from core import DEBUG_MODE, log
 import config
 
+# 全局开关：是否实际执行点击操作，True 则只打印日志不点击
+DISABLE_CLICK = False
+# 全局开关：是否禁用点击下一章，True 则检测到下一章时只打印日志不点击
+DISABLE_NEXT_CHAPTER = False
+
 
 class YggdraBot:
     def __init__(self):
@@ -17,13 +22,16 @@ class YggdraBot:
             config.WINDOW_TITLE, config.ASSETS_DIR, scale=config.SCALE, exact_match=True
         )
         self.bot.set_regions(config.REGIONS)
+        if DISABLE_CLICK or DEBUG_MODE:
+            self.bot.set_disable_click(True)
+            log.info("DISABLE_CLICK is ON: No actual clicks will be performed.")
         # 预加载所有要查找的文件名列表 (排除 404 的)
         self.targets = [k for k, v in ASSETS.items() if "(404)" not in v["desc"]]
-        for k, v in ASSETS.items():
-            log.debug("%s %s", k, v)
 
     def run(self):
         log.info("Bot started for %s. Press Ctrl+C to stop.", config.WINDOW_TITLE)
+        if DEBUG_MODE:
+            log.info("Running in DEBUG MODE. No actual clicks will be performed.")
         frame_count = 0
         try:
             while True:
@@ -89,12 +97,13 @@ class YggdraBot:
                     self.bot.click(res)
                     continue
 
-                # 下一章 (优先级低于战斗准备)
-                res = self.bot.find(screen, "next_chapter.png")
-                if res:
-                    log.info("[逻辑] 发现下一章")
-                    self.bot.click(res)
-                    continue
+                if not DISABLE_NEXT_CHAPTER:
+                    # 下一章 (优先级低于战斗准备)
+                    res = self.bot.find(screen, "next_chapter.png")
+                    if res:
+                        log.info("[逻辑] 发现下一章")
+                        self.bot.click(res)
+                        continue
                 # 重复刷副本，再次战斗
                 res = self.bot.find(screen, "battle_again.png")
                 if res:
@@ -117,6 +126,22 @@ class YggdraBot:
                     log.info("[逻辑] 区域通关，点击空白处关闭")
                     self.bot.click(res, offset=(0, -400))
                     continue
+
+                # 兑换界面，优先点击最大数量
+                redeem_max = self.bot.find(screen, "label_max.png")
+                button_redeem = self.bot.find(screen, "button_redeem.png")
+                if redeem_max and button_redeem:
+                    log.info("[逻辑] 兑换数目，点击最大")
+                    self.bot.click(redeem_max)
+                    time.sleep(0.5)
+                    log.info("[逻辑] 发现兑换按钮，点击兑换")
+                    self.bot.click(button_redeem)
+                    continue
+
+                click_any = self.bot.find(screen, "click_any_position.png")
+                if click_any:
+                    log.info("[逻辑] 兑换完成，点击空白处关闭")
+                    self.bot.click(click_any)
 
                 # 位于关卡选择界面
                 chapter_arrow = self.bot.find(screen, "chapter_arrow.png")
@@ -163,4 +188,20 @@ def run():
 
 
 if __name__ == "__main__":
+    # --click --no-click
+    # --next --no-next
+    # --debug --no-debug
+    args = sys.argv[1:]
+    if "--no-click" in args:
+        DISABLE_CLICK = True
+        log.info("DISABLE_CLICK is ON: No actual clicks will be performed.")
+    if "--no-next" in args:
+        DISABLE_NEXT_CHAPTER = True
+        log.info("DISABLE_NEXT_CHAPTER is ON: Next chapter will not be clicked.")
+    if "--debug" in args:
+        DEBUG_MODE = True
+        log.info("DEBUG_MODE is ON: Running in debug mode with extra logs.")
+    if "--no-debug" in args:
+        DEBUG_MODE = False
+        log.info("DEBUG_MODE is OFF: Running in normal mode.")
     run()
