@@ -32,8 +32,8 @@ class YggdraBot:
         self.bot.set_regions(config.REGIONS)
         # 预加载所有要查找的文件名列表 (排除 404 的)
         self.targets = [k for k, v in ASSETS.items() if "(404)" not in v["desc"]]
-        for k, v in ASSETS.items():
-            log.debug("%s %s", k, v)
+        # for k, v in ASSETS.items():
+        #     log.debug("%s %s", k, v)
 
     def maybe_click(self, target, offset=(0, 0)):
         if self.opts.disable_click:
@@ -58,9 +58,16 @@ class YggdraBot:
 
                 frame_count += 1
                 if core.DEBUG_MODE:
-                    results = self.bot.find_all(screen, self.targets, 0.5)
+                    results = self.bot.find_all(screen, self.targets, 0.6)
                     for r in results:
-                        log.debug("FOUND %s %.2f", r["name"], r["confidence"])
+                        pos = r["pos"]
+                        log.debug(
+                            "POS %s %.2f (%d,%d)",
+                            r["name"],
+                            r["confidence"],
+                            pos[0],
+                            pos[1],
+                        )
 
                 # --------------------------------------------------
                 # 1. 查找所有目标
@@ -136,8 +143,15 @@ class YggdraBot:
                     continue
 
                 # 关卡选择，找头像或者五角星
+                res = self.bot.find(screen, "body.png")
+                if res:
+                    log.info("[逻辑] 点击头像，进入新关卡")
+                    self.maybe_click(res)
+                    continue
+
+                map_icon = self.bot.find(screen, "map_icon.png")
                 chapter_arrow = self.bot.find(screen, "chapter_arrow.png")
-                if chapter_arrow:
+                if chapter_arrow or map_icon:
                     res = self.bot.find(screen, "body.png", 0.7)
                     if res:
                         log.info("[逻辑] 点击头像，进入新关卡")
@@ -183,17 +197,47 @@ class YggdraBot:
                     self.maybe_click(button_redeem)
                     continue
 
-                # 兑换商店列表
-                reedem_stone = self.bot.find(screen, "reedem_stone.png")
-                if reedem_stone:
-                    log.info("[逻辑] 兑换商店，点击石头标签")
-                    self.maybe_click(reedem_stone)
-                    continue
-
+                # 点击屏幕关闭
                 click_any = self.bot.find(screen, "click_any_position.png")
                 if click_any:
                     log.info("[逻辑] 兑换完成，点击空白处关闭")
                     self.maybe_click(click_any)
+                    continue
+
+                # 装备强化界面，先点击选择，再点击强化，最后关闭界面
+                equip_select = self.bot.find(screen, "equip_select.png")
+                if equip_select:
+                    log.info("[逻辑] 装备强化界面，自动选择")
+                    self.maybe_click(equip_select)
+                    time.sleep(0.5)
+                    # 刷新截图，找强化按钮
+                    screen = self.bot.capture_window()
+                    equip_enforce = self.bot.find(screen, "equip_enforce.png")
+                    if equip_enforce:
+                        log.info("[逻辑] 装备强化界面，点击强化")
+                        self.maybe_click(equip_enforce)
+                    back = self.bot.find(screen, "back.png")
+                    if back:
+                        log.info("[逻辑] 装备强化界面，点击返回")
+                        self.maybe_click(back)
+                    time.sleep(0.5)
+                    # 刷新截图，找关闭按钮
+                    screen = self.bot.capture_window()
+                    close = self.bot.find(screen, "close.png")
+                    if close:
+                        log.info("[逻辑] 装备强化界面，点击关闭")
+                        self.maybe_click(close)
+                    continue
+                # 几个全屏确认框
+                ok = self.bot.find(screen, "ok.png")
+                if ok:
+                    log.info("[逻辑] 全屏确认，点击好的1")
+                    self.maybe_click(ok)
+                    continue
+                ok = self.bot.find(screen, "ok2.png")
+                if ok:
+                    log.info("[逻辑] 全屏确认，点击好的2")
+                    self.maybe_click(ok)
                     continue
 
         except KeyboardInterrupt:

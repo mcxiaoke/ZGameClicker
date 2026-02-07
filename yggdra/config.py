@@ -58,7 +58,9 @@ REGIONS = {
     "win.png": (978, 112, 628, 309),
     "skip.png": (2224, 56, 211, 228),
     "ok.png": (1532, 917, 216, 167),
-    "close.png": (2028, 1262, 218, 164),
+    "ok2.png": (1184, 1328, 216, 160),
+    # close may in many places, so no restrict
+    # "close.png": (2028, 1262, 218, 164),
     "cancel.png": (848, 923, 212, 164),
     "award_text.png": (210, 1194, 344, 142),
     "area_clear.png": (834, 658, 912, 247),
@@ -67,4 +69,7 @@ REGIONS = {
     "redeem_confirm.png": (1121, 378, 345, 168),
     "redeem_place.png": (113, 60, 365, 164),
     "label_max.png": (1630, 846, 212, 153),
+    "equip_enforce.png": (2032, 1426, 220, 164),
+    "equip_select.png": (291, 1420, 321, 161),
+    "map_icon.png": (2204, 318, 204, 260),
 }

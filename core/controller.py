@@ -160,6 +160,8 @@ class GameController:
                 abs_x = win_left + win_rel_x
                 abs_y = win_top + win_rel_y
 
+            debug("Found %s %.2f (%d, %d)", image_name, val, abs_x, abs_y)
+
             # 2. 自动生成建议 Region 逻辑
             if not rel_conf and val > 0.6:
                 tpl_w, tpl_h = dims
@@ -172,7 +174,7 @@ class GameController:
                 suggest_rel_x = max(0, win_rel_x - (tpl_w // 2 + 50))
                 suggest_rel_y = max(0, win_rel_y - (tpl_h // 2 + 50))
 
-                info(f"[Region 建议] 图片: {image_name} | 置信度: {val:.2f}")
+                debug(f"[Region 建议] 图片: {image_name} | 置信度: {val:.2f}")
                 # 打印顺序是 (x, y, w, h)
                 info(
                     '"%s": (%d, %d, %d, %d),'
