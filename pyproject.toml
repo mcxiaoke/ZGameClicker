@@ -1,8 +1,11 @@
 [project]
 name = "gameclicker"
 version = "0.1.0"
-description = "Add your description here"
+description = "Game Clicker using opencv and pyautogui"
 readme = "README.md"
+authors = [{ name = "Big Cat", email = "nobody@404.com" }]
+keywords = ["game", "automation", "clicker", "opencv", "pyautogui"]
+
 requires-python = ">=3.12"
 dependencies = [
     "mss>=10.1.0",
@@ -12,3 +15,9 @@ dependencies = [
     "pyautogui>=0.9.54",
     "pywin32>=311",
 ]
+
+[tool.setuptools]
+packages = ["core", "tools", "assets", "yggdra", "assets"]
+
+[project.scripts]
+yggdra = "yggdra.main:run"

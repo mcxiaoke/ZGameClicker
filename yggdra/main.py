@@ -3,14 +3,12 @@ import sys
 import os
 
 sys.path.append(".")
-# 确保能导入 core
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.controller import GameController
 from assets_config import ASSETS
+from core import DEBUG_MODE
 import config
-
-DEBUG_MODE = True
 
 
 class YggdraBot:
@@ -159,6 +157,10 @@ class YggdraBot:
             print("\nBot stopped.")
 
 
-if __name__ == "__main__":
+def run():
     game = YggdraBot()
     game.run()
+
+
+if __name__ == "__main__":
+    run()
