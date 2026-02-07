@@ -78,6 +78,7 @@ ASSETS = {
         "type": "button",
         "click": "single",
     },
+    "levelup.png": {"name": "Levelup", "desc": "", "type": "button", "click": "single"},
     "my_team.png": {"name": "My Team", "desc": "", "type": "label", "click": "single"},
     "new_content.png": {
         "name": "New Content",
@@ -100,6 +101,12 @@ ASSETS = {
     },
     "redeem_place.png": {
         "name": "Redeem Place",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "reedem_stone.png": {
+        "name": "Reedem Stone",
         "desc": "",
         "type": "button",
         "click": "single",
