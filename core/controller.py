@@ -26,6 +26,7 @@ except ImportError:
 from .window import WindowManager
 from .vision import VisionEngine
 from .helper import ScopeTimer
+from .logger_config import info, debug, error
 
 
 class GameController:
@@ -76,7 +77,7 @@ class GameController:
             else:
                 return self._capture_pyautogui(left, top, w, h)
         except Exception as e:
-            print(f"[Controller] Capture Error: {e}")
+            error(f"[Controller] Capture Error: {e}")
             return None
 
     def _capture_mss(self, left, top, w, h):
@@ -167,12 +168,19 @@ class GameController:
                 suggest_rel_x = max(0, win_rel_x - (tpl_w // 2 + 50))
                 suggest_rel_y = max(0, win_rel_y - (tpl_h // 2 + 50))
 
-                print(f"\n[Region 建议] 图片: {image_name} | 置信度: {val:.2f}")
+                info(f"[Region 建议] 图片: {image_name} | 置信度: {val:.2f}")
                 # 打印顺序是 (x, y, w, h)
-                print(
-                    f'"{image_name}": ({int(suggest_rel_x)}, {int(suggest_rel_y)}, {suggest_w}, {suggest_h}),'
+                info(
+                    '"%s": (%d, %d, %d, %d),'
+                    % (
+                        image_name,
+                        int(suggest_rel_x),
+                        int(suggest_rel_y),
+                        suggest_w,
+                        suggest_h,
+                    )
                 )
-                print("-" * 30)
+                debug("-" * 30)
 
             # 3. 返回结构化对象 (现在的缩进确保了 abs_x/y 总是可访问的)
             return {"name": image_name, "pos": (abs_x, abs_y), "confidence": val}
@@ -201,7 +209,7 @@ class GameController:
                         results.append(res)
                 except Exception as e:
                     name = futures[future]
-                    print(f"[Thread Error] {name} matching failed: {e}")
+                    error(f"[Thread Error] {name} matching failed: {e}")
 
         return results
 
@@ -248,7 +256,7 @@ class GameController:
         target_y = pos[1] + offset[1]
 
         # 打印人性化日志
-        print(f"[Action] Click -> {log_name} @ ({target_x}, {target_y})")
+        info(f"[Action] Click -> {log_name} @ ({target_x}, {target_y})")
 
         pyautogui.moveTo(target_x, target_y, duration=0.1)
         pyautogui.click()

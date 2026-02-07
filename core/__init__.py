@@ -11,12 +11,14 @@ import ctypes
 import sys
 from .logger_config import (
     setup_logger,
-    logger as log,
+    log,
     debug,
     info,
     warn,
     error,
     critical,
+    enable_datetime,
+    SHOW_DATETIME,
 )
 
 # 全局 DPI 适配，防止坐标偏移

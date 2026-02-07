@@ -11,6 +11,7 @@ License: Apache License 2.0
 import pygetwindow as gw
 import ctypes
 import psutil
+from .logger_config import error
 
 
 class WindowManager:
@@ -68,7 +69,7 @@ class WindowManager:
                 return True
 
         except Exception as e:
-            print(f"[Window] Error: {e}")
+            error(f"[Window] Error: {e}")
 
         self.rect = None
         self.hwnd = None

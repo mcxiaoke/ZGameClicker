@@ -9,6 +9,7 @@ License: Apache License 2.0
 import os
 import sys
 import ast
+from core import log
 
 
 def format_name(filename):
@@ -24,7 +25,7 @@ def run_gen(game_name):
     output_file = os.path.join(output_dir, "assets_config.py")
 
     if not os.path.exists(assets_dir):
-        print(f"[Error] Assets dir not found: {assets_dir}")
+        log.error("[Error] Assets dir not found: %s", assets_dir)
         return
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -46,7 +47,7 @@ def run_gen(game_name):
                     # 使用 ast.literal_eval 安全解析 Python 字典字符串
                     existing_data = ast.literal_eval(dict_str)
         except Exception as e:
-            print(f"[Warn] Failed to parse existing config: {e}")
+            log.warning("[Warn] Failed to parse existing config: %s", e)
 
     # --- 4. 合并与逻辑处理 ---
     new_data = {}
@@ -62,7 +63,7 @@ def run_gen(game_name):
             new_data[filename] = item
         else:
             # 新文件：生成默认模板
-            print(f"[New] Found: {filename}")
+            log.info("[New] Found: %s", filename)
             new_data[filename] = {
                 "name": format_name(filename),  # 自动生成可读名字
                 "desc": "",  # 留给你手动写
@@ -79,7 +80,7 @@ def run_gen(game_name):
             if "(404)" not in current_desc:
                 item["desc"] = f"(404 File Missing) {current_desc}"
             new_data[key] = item
-            print(f"[Missing] Marked as 404: {key}")
+            log.warning("[Missing] Marked as 404: %s", key)
 
     # --- 5. 生成代码文件 ---
     lines = []
@@ -106,11 +107,11 @@ def run_gen(game_name):
     with open(output_file, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
-    print(f"\n[Success] Updated {output_file}")
+    log.info("[Success] Updated %s", output_file)
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python tools/gen_assets.py <game_name>")
+        log.info("Usage: python tools/gen_assets.py <game_name>")
     else:
         run_gen(sys.argv[1])
