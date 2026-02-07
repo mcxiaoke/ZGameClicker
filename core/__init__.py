@@ -31,7 +31,7 @@ except:
         warn(f"Failed to set DPI awareness: {e}")
 
 # 从命令行参数识别 debug 模式（支持 --debug / -d）
-DEBUG_MODE = "--debug" in sys.argv or "-d" in sys.argv
+DEBUG_MODE = False
 # 初始化日志
 setup_logger(debug_mode=DEBUG_MODE)
 
