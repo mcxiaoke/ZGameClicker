@@ -204,6 +204,13 @@ class YggdraBot:
                     self.maybe_click(click_any)
                     continue
 
+                # 成就界面全部领取
+                claim_all = self.bot.find(screen, "claim_all.png")
+                if claim_all:
+                    log.info("[逻辑] 发现成就全部领取，点击领取")
+                    self.maybe_click(claim_all)
+                    continue
+
                 # 装备强化界面，先点击选择，再点击强化，最后关闭界面
                 equip_select = self.bot.find(screen, "equip_select.png")
                 if equip_select:

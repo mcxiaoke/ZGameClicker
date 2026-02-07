@@ -72,4 +72,5 @@ REGIONS = {
     "equip_enforce.png": (2032, 1426, 220, 164),
     "equip_select.png": (291, 1420, 321, 161),
     "map_icon.png": (2204, 318, 204, 260),
+    "claim_all.png": (2151, 1176, 296, 152),
 }
