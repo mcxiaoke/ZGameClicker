@@ -97,6 +97,14 @@ class YggdraBot:
                 # --------------------------------------------------
 
                 # 简化业务逻辑示例
+                auto_team = self.bot.find(screen, "auto_team.png")
+                if auto_team:
+                    log.info("[逻辑] 发现自动组队，点击自动组队")
+                    self.maybe_click(auto_team)
+                    time.sleep(0.5)  # 等界面切换
+                    screen = self.bot.capture_window()
+                    # 不跳过，继续下面的逻辑
+
                 res1 = self.bot.find(screen, "battle_prepare.png")
                 res2 = self.bot.find(screen, "battle_prepare2.png")
                 if res1 or res2:
@@ -136,10 +144,12 @@ class YggdraBot:
                     continue
 
                 # 关卡选择，找头像或者五角星
-                res = self.bot.find(screen, "body.png")
-                if res:
+                avatar = self.bot.find_best(
+                    screen, ["body.png", "body2.png", "head.png", "head2.png"]
+                )
+                if avatar:
                     log.info("[逻辑] 点击头像，进入新关卡")
-                    self.maybe_click(res)
+                    self.maybe_click(avatar)
                     continue
 
                 map_icon = self.bot.find(screen, "map_icon.png")
@@ -156,11 +166,10 @@ class YggdraBot:
                         self.maybe_click(res)
                     continue
 
-                # 剧情跳过，优先点击好的
-                ok = self.bot.find(screen, "skip_confirm_ok.png")
-                if ok:
-                    log.info("[逻辑] 剧情跳过，点击好的")
-                    self.maybe_click(ok)
+                sure = self.bot.find(screen, "sure.png")
+                if sure:
+                    log.info("[逻辑] 按钮，点击确定")
+                    self.maybe_click(sure)
                     continue
 
                 # 确认按钮，好的
@@ -182,6 +191,13 @@ class YggdraBot:
                 if back or back2:
                     log.info("[逻辑] 按钮，点击返回")
                     self.maybe_click(back or back2)
+                    continue
+
+                # 剧情跳过，优先点击好的
+                ok = self.bot.find(screen, "skip_confirm_ok.png")
+                if ok:
+                    log.info("[逻辑] 剧情跳过，点击好的")
+                    self.maybe_click(ok)
                     continue
 
                 # 跳过剧情

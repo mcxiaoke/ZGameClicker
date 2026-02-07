@@ -160,7 +160,15 @@ class GameController:
                 abs_x = win_left + win_rel_x
                 abs_y = win_top + win_rel_y
 
-            debug("Found %s %.2f (%d, %d)", image_name, val, abs_x, abs_y)
+            debug(
+                "Found %s %.2f (%d, %d)|(%d, %d)",
+                image_name,
+                val,
+                win_rel_x,
+                win_rel_y,
+                abs_x,
+                abs_y,
+            )
 
             # 2. 自动生成建议 Region 逻辑
             if not rel_conf and val > 0.6:

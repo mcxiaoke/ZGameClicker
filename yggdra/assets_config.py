@@ -13,6 +13,12 @@ ASSETS = {
         "type": "button",
         "click": "single",
     },
+    "auto_team.png": {
+        "name": "自动编队",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
     "award_text.png": {
         "name": "条件达成奖励",
         "desc": "",
@@ -23,6 +29,12 @@ ASSETS = {
     "back2.png": {"name": "返回2", "desc": "", "type": "button", "click": "single"},
     "battle_again.png": {
         "name": "再次战斗",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "battle_info.png": {
+        "name": "战斗结果",
         "desc": "",
         "type": "button",
         "click": "single",
@@ -46,6 +58,7 @@ ASSETS = {
         "click": "single",
     },
     "body.png": {"name": "人像", "desc": "", "type": "button", "click": "single"},
+    "body2.png": {"name": "人像2", "desc": "", "type": "button", "click": "single"},
     "button_redeem.png": {
         "name": "Button Redeem",
         "desc": "",
@@ -98,6 +111,7 @@ ASSETS = {
     },
     "event.png": {"name": "Event", "desc": "", "type": "button", "click": "single"},
     "head.png": {"name": "头像", "desc": "", "type": "button", "click": "single"},
+    "head2.png": {"name": "头像2", "desc": "", "type": "button", "click": "single"},
     "label_max.png": {
         "name": "最大数量Max",
         "desc": "",
@@ -166,6 +180,7 @@ ASSETS = {
         "click": "single",
     },
     "stars.png": {"name": "星级Icon", "desc": "", "type": "label", "click": "single"},
+    "sure.png": {"name": "确定", "desc": "", "type": "button", "click": "single"},
     "wave.png": {"name": "波次Icon", "desc": "", "type": "label", "click": "single"},
     "win.png": {"name": "胜利Icon", "desc": "", "type": "label", "click": "single"},
     "win2.png": {"name": "胜利Icon2", "desc": "", "type": "button", "click": "single"},

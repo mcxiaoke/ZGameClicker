@@ -15,7 +15,7 @@ ASSETS_DIR = "assets/yggdra"
 SCALE = 0.8
 
 # 匹配置信度阈值
-CONFIDENCE = 0.9
+CONFIDENCE = 0.85
 
 # 窗口内相对区域配置 (x_offset, y_offset, width, height)
 # 长宽各加200
@@ -45,12 +45,16 @@ REGIONS = {
     "chapter_arrow.png": (102, 56, 329, 168),
     # 角色横向位置不固定，可移动，所以放宽限制
     "head.png": (225, 804, 1800, 220),
+    # "head2.png": (225, 907, 2000, 164),
+    "head2.png": (296, 907, 2100, 164),
     "body.png": (225, 836, 1800, 292),
+    "body2.png": (289, 901, 2100, 224),
     "stars.png": (1148, 948, 291, 163),
     "battle_prepare.png": (1405, 1257, 326, 168),
     "battle_prepare2.png": (1975, 1223, 324, 157),
     "battle_start.png": (2094, 1369, 276, 222),
     "battle_again.png": (643, 1458, 315, 161),
+    "battle_info.png": (1136, 180, 316, 165),
     "my_team.png": (533, 1195, 293, 152),
     "change_team.png": (233, 64, 293, 156),
     "action_count.png": (1158, 50, 269, 143),
@@ -63,6 +67,7 @@ REGIONS = {
     # ok may in many places, so no restrict
     # "ok.png": (1532, 917, 216, 167),
     "ok2.png": (1184, 1328, 216, 160),
+    "sure.png": (1186, 1296, 212, 152),
     # close may in many places, so no restrict
     # "close.png": (2028, 1262, 218, 164),
     "back2.png": (1181, 1458, 216, 164),
