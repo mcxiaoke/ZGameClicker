@@ -20,6 +20,7 @@ ASSETS = {
         "click": "single",
     },
     "back.png": {"name": "返回", "desc": "", "type": "button", "click": "single"},
+    "back2.png": {"name": "返回2", "desc": "", "type": "button", "click": "single"},
     "battle_again.png": {
         "name": "再次战斗",
         "desc": "",
@@ -28,6 +29,12 @@ ASSETS = {
     },
     "battle_prepare.png": {
         "name": "准备战斗",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "battle_prepare2.png": {
+        "name": "准备画面",
         "desc": "",
         "type": "button",
         "click": "single",
@@ -89,6 +96,7 @@ ASSETS = {
         "type": "button",
         "click": "single",
     },
+    "event.png": {"name": "Event", "desc": "", "type": "button", "click": "single"},
     "head.png": {"name": "头像", "desc": "", "type": "button", "click": "single"},
     "label_max.png": {
         "name": "最大数量Max",
@@ -97,12 +105,7 @@ ASSETS = {
         "click": "single",
     },
     "levelup.png": {"name": "升级了", "desc": "", "type": "button", "click": "single"},
-    "map_icon.png": {
-        "name": "地图",
-        "desc": "",
-        "type": "button",
-        "click": "single",
-    },
+    "map_icon.png": {"name": "地图", "desc": "", "type": "button", "click": "single"},
     "my_team.png": {"name": "我的队伍", "desc": "", "type": "label", "click": "single"},
     "new_content.png": {
         "name": "新内容解锁",
@@ -130,14 +133,40 @@ ASSETS = {
         "type": "button",
         "click": "single",
     },
-    "reedem_stone.png": {
-        "name": "水晶",
+    "skip.png": {"name": "跳过Icon1", "desc": "", "type": "button", "click": "single"},
+    "skip2.png": {"name": "跳过Icon2", "desc": "", "type": "button", "click": "single"},
+    "skip_confirm_ok.png": {
+        "name": "跳过剧情-好的",
         "desc": "",
         "type": "button",
         "click": "single",
     },
-    "skip.png": {"name": "跳过Icon", "desc": "", "type": "button", "click": "single"},
-    "stars.png": {"name": "星级Icon", "desc": "", "type": "button", "click": "single"},
-    "wave.png": {"name": "波次Icon", "desc": "", "type": "button", "click": "single"},
-    "win.png": {"name": "胜利Icon", "desc": "", "type": "button", "click": "single"},
+    "skip_confirm_text.png": {
+        "name": "确定跳过剧情吗",
+        "desc": "",
+        "type": "label",
+        "click": "single",
+    },
+    "skip_confirm_title.png": {
+        "name": "跳过剧情",
+        "desc": "",
+        "type": "label",
+        "click": "single",
+    },
+    "stage_extra_reward.png": {
+        "name": "Stage Extra Reward",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "stage_reward.png": {
+        "name": "Stage Reward",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "stars.png": {"name": "星级Icon", "desc": "", "type": "label", "click": "single"},
+    "wave.png": {"name": "波次Icon", "desc": "", "type": "label", "click": "single"},
+    "win.png": {"name": "胜利Icon", "desc": "", "type": "label", "click": "single"},
+    "win2.png": {"name": "胜利Icon2", "desc": "", "type": "button", "click": "single"},
 }

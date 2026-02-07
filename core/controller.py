@@ -127,7 +127,7 @@ class GameController:
                 pass
 
         tpl_path = os.path.join(self.assets_dir, image_name)
-        with ScopeTimer(f"vision.load {image_name}", 0.05):
+        with ScopeTimer(f"vision.load {image_name}", 0.5):
             template_img = self.vision.load_template(tpl_path)
         if template_img is None:
             return None
@@ -137,7 +137,7 @@ class GameController:
             self.vision.confidence = threshold
 
         # --- 关键修正：传入 method 参数 ---
-        with ScopeTimer(f"vision.match {image_name}", 0.05):
+        with ScopeTimer(f"vision.match {image_name}", 0.6):
             found, val, center, dims = self.vision.match(
                 search_img, template_img, method=method
             )

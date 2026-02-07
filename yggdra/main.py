@@ -33,7 +33,7 @@ class YggdraBot:
         # 预加载所有要查找的文件名列表 (排除 404 的)
         self.targets = [k for k, v in ASSETS.items() if "(404)" not in v["desc"]]
         # for k, v in ASSETS.items():
-        #     log.debug("%s %s", k, v)
+        # log.debug("%s %s", k, v["name"])
 
     def maybe_click(self, target, offset=(0, 0)):
         if self.opts.disable_click:
@@ -57,17 +57,9 @@ class YggdraBot:
                     continue
 
                 frame_count += 1
-                if core.DEBUG_MODE:
-                    results = self.bot.find_all(screen, self.targets, 0.6)
-                    for r in results:
-                        pos = r["pos"]
-                        log.debug(
-                            "POS %s %.2f (%d,%d)",
-                            r["name"],
-                            r["confidence"],
-                            pos[0],
-                            pos[1],
-                        )
+                log.debug("Frame #%d captured", frame_count)
+                if core.DEBUG_MODE or 1 == 1:
+                    results = self.bot.find_all(screen, self.targets, 0.5)
 
                 # --------------------------------------------------
                 # 1. 查找所有目标
@@ -105,10 +97,11 @@ class YggdraBot:
                 # --------------------------------------------------
 
                 # 简化业务逻辑示例
-                res = self.bot.find(screen, "battle_prepare.png")
-                if res:
+                res1 = self.bot.find(screen, "battle_prepare.png")
+                res2 = self.bot.find(screen, "battle_prepare2.png")
+                if res1 or res2:
                     log.info("[逻辑] 发现战斗准备，点击开始")
-                    self.maybe_click(res)
+                    self.maybe_click(res1 or res2)
                     continue
 
                 res = self.bot.find(screen, "battle_start.png")
@@ -163,26 +156,52 @@ class YggdraBot:
                         self.maybe_click(res)
                     continue
 
-                # 战斗中，找回合或者行动次数
-                wave = self.bot.find(screen, "wave.png")
-                action_count = self.bot.find(screen, "action_count.png.png")
+                # 剧情跳过，优先点击好的
+                ok = self.bot.find(screen, "skip_confirm_ok.png")
+                if ok:
+                    log.info("[逻辑] 剧情跳过，点击好的")
+                    self.maybe_click(ok)
+                    continue
 
-                if not (wave or action_count):
-                    ok = self.bot.find(screen, "ok.png")
-                    if ok:
-                        log.info("[逻辑] 跳过剧情，点击好的")
-                        self.maybe_click(ok)
-                        continue
-                    skip = self.bot.find(screen, "skip.png")
-                    if skip:
-                        log.info("[逻辑] 跳过剧情，点击跳过")
-                        self.maybe_click(skip)
-                        continue
+                # 确认按钮，好的
+                ok = self.bot.find(screen, "ok.png")
+                if ok:
+                    log.info("[逻辑] 按钮，点击好的1")
+                    self.maybe_click(ok)
+                    continue
+
+                ok = self.bot.find(screen, "ok2.png")
+                if ok:
+                    log.info("[逻辑] 按钮，点击好的2")
+                    self.maybe_click(ok)
+                    continue
+
+                # 返回按钮
+                back = self.bot.find(screen, "back.png")
+                back2 = self.bot.find(screen, "back2.png")
+                if back or back2:
+                    log.info("[逻辑] 按钮，点击返回")
+                    self.maybe_click(back or back2)
+                    continue
+
+                # 跳过剧情
+                skip = self.bot.find(screen, "skip2.png")
+                if skip:
+                    log.info("[逻辑] SKIP按钮，跳过剧情")
+                    self.maybe_click(skip)
+                    continue
+
+                # 事件界面，点击空白处关闭
+                event = self.bot.find(screen, "event.png")
+                if event:
+                    log.info("[逻辑] 点击空白处关闭")
+                    self.maybe_click(event, offset=(0, 100))
+                    continue
 
                 # 等级提升界面
                 click_close = self.bot.find(screen, "click_close.png")
                 if click_close:
-                    log.info("[逻辑] 等级提升，点击空白处关闭")
+                    log.info("[逻辑] 点击空白处关闭")
                     self.maybe_click(click_close, offset=(0, 100))
                     continue
 
@@ -234,17 +253,6 @@ class YggdraBot:
                     if close:
                         log.info("[逻辑] 装备强化界面，点击关闭")
                         self.maybe_click(close)
-                    continue
-                # 几个全屏确认框
-                ok = self.bot.find(screen, "ok.png")
-                if ok:
-                    log.info("[逻辑] 全屏确认，点击好的1")
-                    self.maybe_click(ok)
-                    continue
-                ok = self.bot.find(screen, "ok2.png")
-                if ok:
-                    log.info("[逻辑] 全屏确认，点击好的2")
-                    self.maybe_click(ok)
                     continue
 
         except KeyboardInterrupt:

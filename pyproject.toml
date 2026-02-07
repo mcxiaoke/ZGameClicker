@@ -1,6 +1,6 @@
 [project]
 name = "gameclicker"
-version = "0.1.0"
+version = "0.3.0"
 description = "Game Clicker using opencv and pyautogui"
 readme = "README.md"
 authors = [{ name = "Big Cat", email = "nobody@404.com" }]
