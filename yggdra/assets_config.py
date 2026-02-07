@@ -39,6 +39,12 @@ ASSETS = {
         "click": "single",
     },
     "body.png": {"name": "身体图像", "desc": "", "type": "button", "click": "single"},
+    "button_redeem.png": {
+        "name": "Button Redeem",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
     "cancel.png": {"name": "Cancel", "desc": "", "type": "button", "click": "single"},
     "change_team.png": {
         "name": "Change Team",
@@ -52,6 +58,12 @@ ASSETS = {
         "type": "button",
         "click": "single",
     },
+    "click_any_position.png": {
+        "name": "Click Any Position",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
     "click_close.png": {
         "name": "Click Close",
         "desc": "",
@@ -60,6 +72,12 @@ ASSETS = {
     },
     "close.png": {"name": "Close", "desc": "", "type": "button", "click": "single"},
     "head.png": {"name": "Head", "desc": "", "type": "button", "click": "single"},
+    "label_max.png": {
+        "name": "Label Max",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
     "my_team.png": {"name": "My Team", "desc": "", "type": "label", "click": "single"},
     "new_content.png": {
         "name": "New Content",
@@ -74,6 +92,12 @@ ASSETS = {
         "click": "single",
     },
     "ok.png": {"name": "好的", "desc": "", "type": "button", "click": "single"},
+    "redeem_confirm.png": {
+        "name": "Redeem Confirm",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
     "skip.png": {"name": "Skip", "desc": "", "type": "button", "click": "single"},
     "stars.png": {"name": "Stars", "desc": "", "type": "button", "click": "single"},
     "wave.png": {"name": "Wave", "desc": "", "type": "button", "click": "single"},
