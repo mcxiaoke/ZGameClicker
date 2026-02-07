@@ -98,6 +98,12 @@ ASSETS = {
         "type": "button",
         "click": "single",
     },
+    "redeem_place.png": {
+        "name": "Redeem Place",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
     "skip.png": {"name": "Skip", "desc": "", "type": "button", "click": "single"},
     "stars.png": {"name": "Stars", "desc": "", "type": "button", "click": "single"},
     "wave.png": {"name": "Wave", "desc": "", "type": "button", "click": "single"},
