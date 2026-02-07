@@ -11,7 +11,7 @@ License: Apache License 2.0
 import pygetwindow as gw
 import ctypes
 import psutil
-from .logger_config import error
+from .logger_config import error, debug, warn
 
 
 class WindowManager:
@@ -24,7 +24,6 @@ class WindowManager:
         self.BLACKLIST_PROCESSES = [
             "explorer.exe",
             "code.exe",
-            "pycharm64.exe",
             "cmd.exe",
             "powershell.exe",
             "python.exe",
@@ -49,8 +48,8 @@ class WindowManager:
 
                 # 获取底层句柄 (pygetwindow 对象中通常存储在 _hWnd)
                 current_hwnd = win._hWnd
-
-                if self._get_process_name(current_hwnd) in self.BLACKLIST_PROCESSES:
+                proc_name = self._get_process_name(current_hwnd)
+                if proc_name in self.BLACKLIST_PROCESSES:
                     continue
 
                 target_win = win
@@ -73,6 +72,7 @@ class WindowManager:
 
         self.rect = None
         self.hwnd = None
+        warn(f"[Window] No window matched title='{self.title}'")
         return False
 
     def get_rect(self):

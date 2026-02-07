@@ -26,7 +26,7 @@ except ImportError:
 from .window import WindowManager
 from .vision import VisionEngine
 from .helper import ScopeTimer
-from .logger_config import info, debug, error
+from .logger_config import info, debug, warn, error
 
 
 class GameController:
@@ -67,6 +67,7 @@ class GameController:
 
     def capture_window(self):
         if not self.win_mgr.update_rect():
+            warn(f"Window not found: {self.win_mgr.title}")
             return None
 
         self.last_win_rect = self.win_mgr.get_rect()
@@ -81,7 +82,7 @@ class GameController:
             else:
                 return self._capture_pyautogui(left, top, w, h)
         except Exception as e:
-            error(f"[Controller] Capture Error: {e}")
+            error(f"Capture Error: {e}")
             return None
 
     def _capture_mss(self, left, top, w, h):
@@ -274,6 +275,6 @@ class GameController:
             return
 
         # 打印人性化日志
-        info(f"Click -> {log_name}@({target_x}, {target_y})")
+        info(f"[Click] {log_name}@({target_x}, {target_y})")
         pyautogui.moveTo(target_x, target_y, duration=0.1)
         pyautogui.click()
