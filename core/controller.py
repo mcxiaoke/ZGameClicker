@@ -139,7 +139,7 @@ class GameController:
             self.vision.confidence = threshold
 
         # --- 关键修正：传入 method 参数 ---
-        with ScopeTimer(f"vision.match {image_name}", 0.6):
+        with ScopeTimer(f"vision.match {image_name}", 0.5):
             found, val, center, dims = self.vision.match(
                 search_img, template_img, method=method
             )
@@ -182,7 +182,7 @@ class GameController:
                 suggest_rel_x = max(0, win_rel_x - (tpl_w // 2 + 50))
                 suggest_rel_y = max(0, win_rel_y - (tpl_h // 2 + 50))
 
-                debug(f"[Region 建议] 图片: {image_name} | 置信度: {val:.2f}")
+                debug(f"[Region] 图片:{image_name} | 置信度:{val:.2f}")
                 # 打印顺序是 (x, y, w, h)
                 debug(
                     '"%s": (%d, %d, %d, %d),'
@@ -215,7 +215,7 @@ class GameController:
             for name in image_names
         }
 
-        with ScopeTimer(f"find_all", 0.05):
+        with ScopeTimer(f"find_all", 0.2):
             for future in as_completed(futures):
                 try:
                     res = future.result()

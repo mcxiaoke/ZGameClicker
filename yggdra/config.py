@@ -32,6 +32,7 @@ REGIONS = {
     "battle_prepare.png": (1405, 1257, 326, 168),
     "battle_prepare2.png": (1975, 1223, 324, 157),
     "battle_start.png": (2094, 1369, 276, 222),
+    "battle_start_quick.png": (1391, 1260, 324, 161),
     "battle_again.png": (643, 1458, 315, 161),
     "battle_again2.png": (875, 1413, 315, 161),
     "battle_info.png": (1136, 180, 316, 165),

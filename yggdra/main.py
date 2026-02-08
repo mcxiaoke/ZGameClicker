@@ -49,7 +49,7 @@ class YggdraBot:
         screen = self.bot.capture_window()
         if screen is None:
             return screen, [], {}
-        # todo
+
         all_results = self.bot.find_all(screen, self.targets, 0.6)
         results = [
             r for r in all_results if r.get("confidence", 0) >= config.CONFIDENCE
@@ -82,6 +82,14 @@ class YggdraBot:
 
                 frame_count += 1
                 log.debug("Frame #%d captured", frame_count)
+
+                # 战斗界面，跳过其它检测
+                wave = res_map.get("wave.png")
+                action_count = res_map.get("action_count.png")
+                if wave and action_count:
+                    log.debug("[UI] 战斗中，跳过其它检测")
+                    time.sleep(2)
+                    continue
 
                 # 简化业务逻辑示例
                 auto_team = res_map.get("auto_team.png")
@@ -151,6 +159,12 @@ class YggdraBot:
                 )
                 if chapter_select:
                     log.info("[UI] 关卡选择界面")
+                    # 战斗快速开始，固定队伍
+                    battle_quick = res_map.get("battle_start_quick.png")
+                    if battle_quick:
+                        log.info("[逻辑] 战斗快速开始 %s", item_to_str(battle_quick))
+                        self.maybe_click(battle_quick)
+                        continue
                     # 选择置信度最高的头像候选
                     avatar_candidates = [
                         res_map.get(n)

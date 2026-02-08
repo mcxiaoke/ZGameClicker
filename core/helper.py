@@ -26,5 +26,5 @@ class ScopeTimer:
     def __exit__(self, exc_type, exc_val, exc_tb):
         cost = time.perf_counter() - self.start
         if cost > self.threshold:
-            # print(f"[Perf] {self.name}: {cost:.4f}s")
+            print(f"[Perf] {self.name}: {cost:.4f}s")
             pass

@@ -64,6 +64,12 @@ ASSETS = {
         "type": "button",
         "click": "single",
     },
+    "battle_start_quick.png": {
+        "name": "战斗快速开始",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
     "body2.png": {"name": "人像2", "desc": "", "type": "button", "click": "single"},
     "body_main.png": {
         "name": "人像主线",
