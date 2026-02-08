@@ -67,6 +67,8 @@ class YggdraBot:
     def run(self):
         log.info("Bot started for %s. Press Ctrl+C to stop.", config.WINDOW_TITLE)
         frame_count = 0
+        battle_count = 0
+        battle_last_at = 0
         try:
             while True:
                 # 操作之间间隔时间，防止重复点击
@@ -99,14 +101,24 @@ class YggdraBot:
 
                 battle_start = res_map.get("battle_start.png")
                 if battle_start:
-                    log.info("[逻辑] 战斗开始 %s", item_to_str(battle_start))
+                    battle_count += 1
+                    log.info(
+                        "[逻辑] 战斗开始[%03d] %s",
+                        battle_count,
+                        item_to_str(battle_start),
+                    )
                     self.maybe_click(battle_start)
                     continue
 
                 # 关卡通关界面
                 battle_win = res_map.get("win.png") and res_map.get("stage_reward.png")
                 if battle_win:
-                    log.info("[UI] 关卡通关界面")
+                    current_time = time.time()
+                    elapsed = (
+                        (current_time - battle_last_at) if battle_last_at > 0 else 0
+                    )
+                    battle_last_at = current_time
+                    log.info(f"[UI] 关卡通关界面 通关时间={round(elapsed)}秒")
                     if not self.opts.disable_next:
                         res = res_map.get("next_chapter.png")
                         if res:
@@ -158,7 +170,10 @@ class YggdraBot:
                         else None
                     )
                     if avatar:
-                        log.info("[逻辑] 点击头像，进入关卡 %s", item_to_str(avatar))
+                        log.info(
+                            "[逻辑] 进入关卡 %s",
+                            item_to_str(avatar),
+                        )
                         self.maybe_click(avatar)
                         continue
 
