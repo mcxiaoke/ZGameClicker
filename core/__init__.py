@@ -9,17 +9,7 @@ License: Apache License 2.0
 # core/__init__.py
 import ctypes
 import sys
-from .logger_config import (
-    setup_logger,
-    log,
-    debug,
-    info,
-    warn,
-    error,
-    critical,
-    enable_datetime,
-    SHOW_DATETIME,
-)
+from .logger_config import setup_logger, log, debug, info, warn, error, critical
 
 # 全局 DPI 适配，防止坐标偏移
 try:

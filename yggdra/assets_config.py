@@ -27,8 +27,15 @@ ASSETS = {
     },
     "back.png": {"name": "返回", "desc": "", "type": "button", "click": "single"},
     "back2.png": {"name": "返回2", "desc": "", "type": "button", "click": "single"},
+    "back3.png": {"name": "返回3", "desc": "", "type": "button", "click": "single"},
     "battle_again.png": {
         "name": "再次战斗",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "battle_again2.png": {
+        "name": "再次战斗2",
         "desc": "",
         "type": "button",
         "click": "single",
@@ -57,8 +64,19 @@ ASSETS = {
         "type": "button",
         "click": "single",
     },
-    "body.png": {"name": "人像", "desc": "", "type": "button", "click": "single"},
     "body2.png": {"name": "人像2", "desc": "", "type": "button", "click": "single"},
+    "body_main.png": {
+        "name": "人像主线",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "body_main2.png": {
+        "name": "人像主线2",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
     "button_redeem.png": {
         "name": "Button Redeem",
         "desc": "",
@@ -110,8 +128,19 @@ ASSETS = {
         "click": "single",
     },
     "event.png": {"name": "Event", "desc": "", "type": "button", "click": "single"},
-    "head.png": {"name": "头像", "desc": "", "type": "button", "click": "single"},
     "head2.png": {"name": "头像2", "desc": "", "type": "button", "click": "single"},
+    "head_main.png": {
+        "name": "头像主线",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
+    "head_main2.png": {
+        "name": "头像主线2",
+        "desc": "",
+        "type": "button",
+        "click": "single",
+    },
     "label_max.png": {
         "name": "最大数量Max",
         "desc": "",

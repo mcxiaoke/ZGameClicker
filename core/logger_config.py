@@ -10,24 +10,20 @@ import sys
 import inspect
 from typing import Optional
 
-
 # 初始化日志配置
-# 全局开关：是否在日志中显示日期时间
-SHOW_DATETIME = False
+SHOW_DATETIME = True
 
 
-def setup_logger(debug_mode: bool = False, show_datetime: bool = False):
+def setup_logger(debug_mode: bool = False):
     """
     配置日志格式和级别
     :param debug_mode: True 显示DEBUG及以上日志，False 只显示INFO及以上
     """
     # 根据开关选择日志格式
-    global SHOW_DATETIME
-    SHOW_DATETIME = show_datetime
     if SHOW_DATETIME:
         # 包含日期时间
-        log_format = "%(asctime)s [%(levelname).1s] %(name)s: %(message)s"
-        date_format = "%Y-%m-%d %H:%M:%S"
+        log_format = "%(asctime)s|[%(levelname).1s]%(name)s: %(message)s"
+        date_format = "%H:%M:%S"
     else:
         # 不包含日期时间，级别使用首字母缩写
         log_format = "[%(levelname).1s] %(name)s: %(message)s"
@@ -73,27 +69,6 @@ def setup_logger(debug_mode: bool = False, show_datetime: bool = False):
 
     console_handler.addFilter(FriendlyNameFilter())
     root_logger.addHandler(console_handler)
-
-
-def enable_datetime(enable: bool):
-    """在运行时切换是否在日志中显示日期时间。
-
-    该函数会更新根 logger 的所有 handler 的格式器。
-    """
-    global SHOW_DATETIME
-    SHOW_DATETIME = bool(enable)
-    # 更新现有 handler 的格式器
-    date_format = "%Y-%m-%d %H:%M:%S"
-    for h in logging.getLogger().handlers:
-        try:
-            if SHOW_DATETIME:
-                fmt = "%(asctime)s [%(levelname).1s] %(name)s: %(message)s"
-                h.setFormatter(logging.Formatter(fmt, date_format))
-            else:
-                fmt = "[%(levelname).1s] %(name)s: %(message)s"
-                h.setFormatter(logging.Formatter(fmt))
-        except Exception:
-            pass
 
 
 class _ProxyLogger:

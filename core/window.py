@@ -57,7 +57,11 @@ class WindowManager:
 
             if target_win:
                 if target_win.isMinimized:
-                    target_win.restore()
+                    warn(f"[Window] Matched window is minimized: '{target_win.title}' - ignoring (not restoring automatically)")
+                    self.rect = None
+                    self.hwnd = None
+                    return False
+
                 self.rect = (
                     target_win.left,
                     target_win.top,

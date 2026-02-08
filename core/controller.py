@@ -8,6 +8,7 @@ License: Apache License 2.0
 
 # core/controller.py
 import pyautogui
+import ctypes
 import numpy as np
 import cv2
 import time
@@ -162,13 +163,11 @@ class GameController:
                 abs_y = win_top + win_rel_y
 
             debug(
-                "Found %s %.2f (%d, %d)|(%d, %d)",
+                "Found %s %.2f (%d, %d)",
                 image_name,
                 val,
                 win_rel_x,
                 win_rel_y,
-                abs_x,
-                abs_y,
             )
 
             # 2. 自动生成建议 Region 逻辑
@@ -185,7 +184,7 @@ class GameController:
 
                 debug(f"[Region 建议] 图片: {image_name} | 置信度: {val:.2f}")
                 # 打印顺序是 (x, y, w, h)
-                info(
+                debug(
                     '"%s": (%d, %d, %d, %d),'
                     % (
                         image_name,
@@ -238,43 +237,47 @@ class GameController:
             return None
         return max(results, key=lambda x: x["confidence"])
 
+    def is_window_active(self):
+        # 如果目标窗口不是前台，记录警告，但仍继续点击（用户要求）
+        try:
+            target_hwnd = self.win_mgr.get_hwnd()
+            if target_hwnd:
+                fg = ctypes.windll.user32.GetForegroundWindow()
+                try:
+                    # 比较根窗口，避免子窗口或控件差异
+                    root_target = ctypes.windll.user32.GetAncestor(target_hwnd, 2)
+                    root_fg = ctypes.windll.user32.GetAncestor(fg, 2)
+                except Exception:
+                    root_target = target_hwnd
+                    root_fg = fg
+
+                return root_target == root_fg
+        except Exception:
+            debug("[Click] Foreground check failed; proceeding to click")
+        return False
+
     def click(self, target, offset=(0, 0)):
         """
-        [动作] 点击目标
-        :param target: 可以是 find() 返回的结果对象，或者是 assets_config 中的配置项(需包含 pos)
+        :param target: find() 返回的结果对象(需包含 pos)
         """
         if not target:
             return
 
         pos = None
-        log_name = "Unknown Target"
-
-        # case 1: target 是 find/find_all 返回的结果字典 {'name':..., 'pos':...}
+        name = "Unknown"
         if isinstance(target, dict):
-            if "pos" in target:
-                pos = target["pos"]
-            # 尝试获取用于显示的名字
-            if "alias" in target:  # 如果我们在 main 里注入了 alias
-                log_name = target["alias"]
-            elif "name" in target:  # 文件名
-                log_name = target["name"]
-
-        # case 2: target 是纯坐标
-        elif isinstance(target, (tuple, list)):
-            pos = target
-            log_name = f"Pos{pos}"
-
-        if not pos:
-            return
+            pos = target.get("pos")
+            name = target.get("name")
 
         target_x = pos[0] + offset[0]
         target_y = pos[1] + offset[1]
-
+        # 点击前检查窗口是否在前台
+        if not self.is_window_active():
+            debug(f"[Click] Window is not foreground")
         if self.disable_click:
-            info(f"[DISABLED] Not Click -> {log_name}@({target_x}, {target_y})")
-            return
-
-        # 打印人性化日志
-        info(f"[Click] {log_name}@({target_x}, {target_y})")
-        pyautogui.moveTo(target_x, target_y, duration=0.1)
-        pyautogui.click()
+            debug(f"[DISABLED] Not Click -> {name}@({target_x}, {target_y})")
+        else:
+            # 打印人性化日志
+            debug(f"[Click] {name}@({target_x}, {target_y})")
+            pyautogui.moveTo(target_x, target_y, duration=0.1)
+            pyautogui.click()

@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from core.controller import GameController
 from assets_config import ASSETS
-from core import log, setup_logger, enable_datetime
+from core import log, setup_logger
 import core
 import config
 
@@ -17,50 +17,43 @@ import config
 class YggdraBot:
     def __init__(self, opts: "CLIOptions"):
         self.opts = opts
-        # dynamic setup: reconfigure logger according to CLI
-        setup_logger(debug_mode=opts.debug_mode, show_datetime=opts.show_datetime)
-        enable_datetime(opts.show_datetime)
-        # update core DEBUG_MODE so other modules that import it read the intended value
-        try:
-            core.DEBUG_MODE = opts.debug_mode
-        except Exception:
-            pass
-
         self.bot = GameController(
             config.WINDOW_TITLE, config.ASSETS_DIR, scale=config.SCALE, exact_match=True
         )
         self.bot.set_regions(config.REGIONS)
+        self.bot.set_disable_click(opts.disable_click)
         # 预加载所有要查找的文件名列表 (排除 404 的)
-        self.targets = [k for k, v in ASSETS.items() if "(404)" not in v["desc"]]
+        self.targets = [k for k, v in ASSETS.items() if "404" not in v["desc"]]
         # for k, v in ASSETS.items():
         # log.debug("%s %s", k, v["name"])
 
     def maybe_click(self, target, offset=(0, 0)):
-        if self.opts.disable_click:
-            log.info("[DryRun] Not Click -> %s", getattr(target, "name", target))
-            return
         self.bot.click(target, offset=offset)
 
     def _capture_and_build_res_map(self):
         """Capture the window, run find_all once and build res_map.
-
-        Returns tuple: (screen, results, res_map)
+        Returns tuple: (screen, res_map, results)
+        需要保存两种，用 0.6 的阈值找到更多候选项，供后续逻辑选择；
+        同时也用 0.85 的阈值找到更准确的结果，供直接点击使用。
+        TODO
         """
         screen = self.bot.capture_window()
         if screen is None:
             return screen, [], {}
-        results = self.bot.find_all(screen, self.targets)
+        # todo
+        all_results = self.bot.find_all(screen, self.targets, 0.6)
+        results = [
+            r for r in all_results if r.get("confidence", 0) >= config.CONFIDENCE
+        ]
+        # item: {"name": image_name, "pos": (abs_x, abs_y), "confidence": val}
         res_map = {}
         for item in results:
             filename = item.get("name")
             asset = ASSETS.get(filename)
             if asset:
-                item["alias"] = asset.get("name")
-                item["desc"] = asset.get("desc")
-                item["click_type"] = asset.get("click")
-                item["type"] = asset.get("type")
+                item["asset"] = asset
             res_map[filename] = item
-        return screen, results, res_map
+        return screen, res_map, results
 
     def run(self):
         log.info("Bot started for %s. Press Ctrl+C to stop.", config.WINDOW_TITLE)
@@ -69,170 +62,156 @@ class YggdraBot:
             while True:
                 # 操作之间间隔时间，防止重复点击
                 time.sleep(1)
-                # --- 第一步：获取当前帧 (截图 1 次) ---
-                frame_count += 1
-                log.debug("Frame #%d captured", frame_count)
                 # 一次性批量查找所有目标并构建索引表
-                screen, results, res_map = self._capture_and_build_res_map()
+                screen, res_map, results = self._capture_and_build_res_map()
                 if screen is None:
                     time.sleep(5)  # 窗口可能没了，多等等
                     frame_count = 0
                     continue
 
+                frame_count += 1
+                log.debug("Frame #%d captured", frame_count)
+
                 # 简化业务逻辑示例
                 auto_team = res_map.get("auto_team.png")
                 if auto_team:
-                    log.info("[逻辑] 发现自动组队，点击自动组队")
+                    log.info("[逻辑] 自动组队", auto_team)
                     self.maybe_click(auto_team)
                     time.sleep(0.5)  # 等界面切换
                     # 不跳过，继续下面的逻辑
 
-                res1 = res_map.get("battle_prepare.png")
-                res2 = res_map.get("battle_prepare2.png")
-                if res1 or res2:
-                    log.info("[逻辑] 发现战斗准备，点击开始")
-                    self.maybe_click(res1 or res2)
+                battle_prepare = res_map.get("battle_prepare.png") or res_map.get(
+                    "battle_prepare2.png"
+                )
+                if battle_prepare:
+                    log.info("[逻辑] 战斗准备")
+                    self.maybe_click(battle_prepare)
                     continue
 
-                res = res_map.get("battle_start.png")
-                if res:
-                    log.info("[逻辑] 战斗开始")
-                    self.maybe_click(res)
+                battle_start = res_map.get("battle_start.png")
+                if battle_start:
+                    log.info("[逻辑] 战斗开始", battle_start)
+                    self.maybe_click(battle_start)
                     continue
 
-                if not self.opts.disable_next:
-                    res = res_map.get("next_chapter.png")
-                    if res:
-                        log.info("[逻辑] 下一章")
-                        self.maybe_click(res)
+                # 关卡通关界面
+                battle_win = res_map.get("win.png") and res_map.get("stage_reward.png")
+                if battle_win:
+                    log.info("[UI] 关卡通关界面")
+                    if not self.opts.disable_next:
+                        res = res_map.get("next_chapter.png")
+                        if res:
+                            log.info("[逻辑] 下一章", res)
+                            self.maybe_click(res)
+                            continue
+                    battle_again = res_map.get("battle_again.png") or res_map.get(
+                        "battle_again2.png"
+                    )
+                    if battle_again:
+                        log.info("[逻辑] 再次战斗", battle_again)
+                        self.maybe_click(battle_again)
                         continue
 
-                res = res_map.get("battle_again.png")
-                if res:
-                    log.info("[逻辑] 再次战斗")
-                    self.maybe_click(res)
-                    continue
-
-                res = res_map.get("area_clear.png")
-                if res:
-                    log.info("[逻辑] 区域通关，点击空白处关闭")
-                    self.maybe_click(res, offset=(0, -400))
+                area_clear = res_map.get("area_clear.png")
+                if area_clear:
+                    log.info("[逻辑] 区域通关", area_clear)
+                    self.maybe_click(area_clear, offset=(0, -400))
                     continue
 
                 res = res_map.get("new_content.png")
                 if res:
-                    log.info("[逻辑] 新区域解锁，点击空白处关闭")
+                    log.info("[逻辑] 新区域解锁", res)
                     self.maybe_click(res, offset=(0, -400))
                     continue
 
-                # 关卡选择，找头像或者五角星
-                # 从批量结果中选择置信度最高的头像候选
-                avatar_candidates = [
-                    res_map.get(n)
-                    for n in ["body.png", "body2.png", "head.png", "head2.png"]
-                    if res_map.get(n)
-                ]
-                avatar = (
-                    max(avatar_candidates, key=lambda x: x.get("confidence", 0))
-                    if avatar_candidates
-                    else None
+                # 关卡选择界面
+                chapter_select = res_map.get("map_icon.png") or res_map.get(
+                    "chapter_arrow.png"
                 )
-                if avatar:
-                    log.info("[逻辑] 点击头像，进入新关卡")
-                    self.maybe_click(avatar)
-                    continue
-
-                map_icon = res_map.get("map_icon.png")
-                chapter_arrow = res_map.get("chapter_arrow.png")
-                if chapter_arrow or map_icon:
-                    r = res_map.get("body.png")
-                    if r and r.get("confidence", 0) >= 0.7:
-                        log.info("[逻辑] 点击头像，进入新关卡")
-                        self.maybe_click(r)
-
-                    s = res_map.get("stars.png")
-                    if s and s.get("confidence", 0) >= 0.7:
-                        log.info("[逻辑] 点击关卡，进入新关卡")
-                        self.maybe_click(s)
-                    continue
+                if chapter_select:
+                    log.info("[UI] 关卡选择界面")
+                    # 选择置信度最高的头像候选
+                    avatar_candidates = [
+                        res_map.get(n)
+                        for n in [
+                            "body_main.png",
+                            "body_main2.png",
+                            "head_main.png",
+                            "head_main2.png",
+                            "head2.png",
+                            "body2.png",
+                        ]
+                        if res_map.get(n)
+                    ]
+                    avatar = (
+                        max(avatar_candidates, key=lambda x: x.get("confidence", 0))
+                        if avatar_candidates
+                        else None
+                    )
+                    if avatar:
+                        log.info("[逻辑] 点击头像，进入关卡", avatar)
+                        self.maybe_click(avatar)
+                        continue
 
                 sure = res_map.get("sure.png")
                 if sure:
-                    log.info("[逻辑] 按钮，点击确定")
+                    log.info("[逻辑] 点击确定", sure)
                     self.maybe_click(sure)
                     continue
 
                 # 确认按钮，好的
-                ok = res_map.get("ok.png")
+                ok = res_map.get("ok.png") or res_map.get("ok2.png")
                 if ok:
-                    log.info("[逻辑] 按钮，点击好的1")
-                    self.maybe_click(ok)
-                    continue
-
-                ok = res_map.get("ok2.png")
-                if ok:
-                    log.info("[逻辑] 按钮，点击好的2")
+                    log.info("[逻辑] 点击好的", ok)
                     self.maybe_click(ok)
                     continue
 
                 # 返回按钮
-                back = res_map.get("back.png")
-                back2 = res_map.get("back2.png")
-                if back or back2:
-                    log.info("[逻辑] 按钮，点击返回")
-                    self.maybe_click(back or back2)
+                back = res_map.get("back.png") or res_map.get("back2.png")
+                if back:
+                    log.info("[逻辑] 点击返回", back)
+                    self.maybe_click(back)
                     continue
 
                 # 剧情跳过，优先点击好的
-                ok = res_map.get("skip_confirm_ok.png")
-                if ok:
-                    log.info("[逻辑] 剧情跳过，点击好的")
-                    self.maybe_click(ok)
+                confirm = res_map.get("skip_confirm_ok.png")
+                if confirm:
+                    log.info("[逻辑] 剧情跳过，好的", confirm)
+                    self.maybe_click(confirm)
                     continue
 
                 # 跳过剧情
                 skip = res_map.get("skip2.png")
                 if skip:
-                    log.info("[逻辑] SKIP按钮，跳过剧情")
+                    log.info("[逻辑] 跳过剧情", skip)
                     self.maybe_click(skip)
                     continue
 
                 # 事件界面，点击空白处关闭
                 event = res_map.get("event.png")
                 if event:
-                    log.info("[逻辑] 点击空白处关闭")
+                    log.info("[逻辑] 事件，点击关闭", event)
                     self.maybe_click(event, offset=(0, 100))
                     continue
 
                 # 等级提升界面
                 click_close = res_map.get("click_close.png")
                 if click_close:
-                    log.info("[逻辑] 点击空白处关闭")
+                    log.info("[逻辑] 点击空白处关闭", click_close)
                     self.maybe_click(click_close, offset=(0, 100))
-                    continue
-
-                # 兑换界面，优先点击最大数量
-                redeem_max = res_map.get("label_max.png")
-                button_redeem = res_map.get("button_redeem.png")
-                if redeem_max and button_redeem:
-                    log.info("[逻辑] 兑换数目，点击最大")
-                    self.maybe_click(redeem_max)
-                    time.sleep(0.5)
-                    log.info("[逻辑] 发现兑换按钮，点击兑换")
-                    self.maybe_click(button_redeem)
                     continue
 
                 # 点击屏幕关闭
                 click_any = res_map.get("click_any_position.png")
                 if click_any:
-                    log.info("[逻辑] 兑换完成，点击空白处关闭")
+                    log.info("[逻辑] 点击空白处关闭", click_any)
                     self.maybe_click(click_any)
                     continue
 
                 # 成就界面全部领取
                 claim_all = res_map.get("claim_all.png")
                 if claim_all:
-                    log.info("[逻辑] 发现成就全部领取，点击领取")
+                    log.info("[逻辑] 全部领取", claim_all)
                     self.maybe_click(claim_all)
                     continue
 
@@ -243,7 +222,7 @@ class YggdraBot:
                     self.maybe_click(equip_select)
                     time.sleep(0.5)
                     # 刷新截图，找强化按钮
-                    screen, results, res_map = self._capture_and_build_res_map()
+                    screen, res_map, results = self._capture_and_build_res_map()
                     if screen is None:
                         continue
                     equip_enforce = res_map.get("equip_enforce.png")
@@ -271,6 +250,8 @@ class YggdraBot:
 
 def run():
     opts = parse_args(sys.argv[1:])
+    core.DEBUG_MODE = opts.debug_mode or False
+    setup_logger(debug_mode=opts.debug_mode)
     log.info(opts)
     game = YggdraBot(opts)
     game.run()
@@ -281,7 +262,6 @@ class CLIOptions:
     disable_click: bool = False
     disable_next: bool = False
     debug_mode: bool = False
-    show_datetime: bool = False
 
 
 def parse_args(argv=None) -> CLIOptions:
@@ -297,9 +277,6 @@ def parse_args(argv=None) -> CLIOptions:
         help="Disable auto next chapter",
     )
     p.add_argument("-d", "--debug", action="store_true", help="Enable debug logging")
-    p.add_argument(
-        "--show-datetime", action="store_true", help="Include date/time in logs"
-    )
 
     args, unknown = p.parse_known_args(argv)
     if unknown:
@@ -311,7 +288,6 @@ def parse_args(argv=None) -> CLIOptions:
         disable_click=args.disable_click or args.debug,
         disable_next=args.disable_next,
         debug_mode=args.debug,
-        show_datetime=args.show_datetime,
     )
 
 
