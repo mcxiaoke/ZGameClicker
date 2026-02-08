@@ -14,6 +14,15 @@ import core
 import config
 
 
+def item_to_str(item):
+    if not item:
+        return "None"
+    asset = item.get("asset", {})
+    name = item.get("name", "Unknown")
+    confidence = item.get("confidence", 0)
+    return f"{name} {confidence:.2f}|{item.get('pos')}"
+
+
 class YggdraBot:
     def __init__(self, opts: "CLIOptions"):
         self.opts = opts
@@ -75,7 +84,7 @@ class YggdraBot:
                 # 简化业务逻辑示例
                 auto_team = res_map.get("auto_team.png")
                 if auto_team:
-                    log.info("[逻辑] 自动组队", auto_team)
+                    log.info("[逻辑] 自动组队 %s", item_to_str(auto_team))
                     self.maybe_click(auto_team)
                     time.sleep(0.5)  # 等界面切换
                     # 不跳过，继续下面的逻辑
@@ -84,13 +93,13 @@ class YggdraBot:
                     "battle_prepare2.png"
                 )
                 if battle_prepare:
-                    log.info("[逻辑] 战斗准备")
+                    log.info("[逻辑] 战斗准备 %s", item_to_str(battle_prepare))
                     self.maybe_click(battle_prepare)
                     continue
 
                 battle_start = res_map.get("battle_start.png")
                 if battle_start:
-                    log.info("[逻辑] 战斗开始", battle_start)
+                    log.info("[逻辑] 战斗开始 %s", item_to_str(battle_start))
                     self.maybe_click(battle_start)
                     continue
 
@@ -101,26 +110,26 @@ class YggdraBot:
                     if not self.opts.disable_next:
                         res = res_map.get("next_chapter.png")
                         if res:
-                            log.info("[逻辑] 下一章", res)
+                            log.info("[逻辑] 下一章 %s", item_to_str(res))
                             self.maybe_click(res)
                             continue
                     battle_again = res_map.get("battle_again.png") or res_map.get(
                         "battle_again2.png"
                     )
                     if battle_again:
-                        log.info("[逻辑] 再次战斗", battle_again)
+                        log.info("[逻辑] 再次战斗 %s", item_to_str(battle_again))
                         self.maybe_click(battle_again)
                         continue
 
                 area_clear = res_map.get("area_clear.png")
                 if area_clear:
-                    log.info("[逻辑] 区域通关", area_clear)
+                    log.info("[逻辑] 区域通关 %s", item_to_str(area_clear))
                     self.maybe_click(area_clear, offset=(0, -400))
                     continue
 
                 res = res_map.get("new_content.png")
                 if res:
-                    log.info("[逻辑] 新区域解锁", res)
+                    log.info("[逻辑] 新区域解锁 %s", item_to_str(res))
                     self.maybe_click(res, offset=(0, -400))
                     continue
 
@@ -149,69 +158,69 @@ class YggdraBot:
                         else None
                     )
                     if avatar:
-                        log.info("[逻辑] 点击头像，进入关卡", avatar)
+                        log.info("[逻辑] 点击头像，进入关卡 %s", item_to_str(avatar))
                         self.maybe_click(avatar)
                         continue
 
                 sure = res_map.get("sure.png")
                 if sure:
-                    log.info("[逻辑] 点击确定", sure)
+                    log.info("[逻辑] 点击确定 %s", item_to_str(sure))
                     self.maybe_click(sure)
                     continue
 
                 # 确认按钮，好的
                 ok = res_map.get("ok.png") or res_map.get("ok2.png")
                 if ok:
-                    log.info("[逻辑] 点击好的", ok)
+                    log.info("[逻辑] 点击好的 %s", item_to_str(ok))
                     self.maybe_click(ok)
                     continue
 
                 # 返回按钮
                 back = res_map.get("back.png") or res_map.get("back2.png")
                 if back:
-                    log.info("[逻辑] 点击返回", back)
+                    log.info("[逻辑] 点击返回 %s", item_to_str(back))
                     self.maybe_click(back)
                     continue
 
                 # 剧情跳过，优先点击好的
                 confirm = res_map.get("skip_confirm_ok.png")
                 if confirm:
-                    log.info("[逻辑] 剧情跳过，好的", confirm)
+                    log.info("[逻辑] 剧情跳过，好的 %s", item_to_str(confirm))
                     self.maybe_click(confirm)
                     continue
 
                 # 跳过剧情
                 skip = res_map.get("skip2.png")
                 if skip:
-                    log.info("[逻辑] 跳过剧情", skip)
+                    log.info("[逻辑] 跳过剧情 %s", item_to_str(skip))
                     self.maybe_click(skip)
                     continue
 
                 # 事件界面，点击空白处关闭
                 event = res_map.get("event.png")
                 if event:
-                    log.info("[逻辑] 事件，点击关闭", event)
+                    log.info("[逻辑] 事件，点击关闭 %s", item_to_str(event))
                     self.maybe_click(event, offset=(0, 100))
                     continue
 
                 # 等级提升界面
                 click_close = res_map.get("click_close.png")
                 if click_close:
-                    log.info("[逻辑] 点击空白处关闭", click_close)
+                    log.info("[逻辑] 点击空白处关闭 %s", item_to_str(click_close))
                     self.maybe_click(click_close, offset=(0, 100))
                     continue
 
                 # 点击屏幕关闭
                 click_any = res_map.get("click_any_position.png")
                 if click_any:
-                    log.info("[逻辑] 点击空白处关闭", click_any)
+                    log.info("[逻辑] 点击屏幕关闭 %s", item_to_str(click_any))
                     self.maybe_click(click_any)
                     continue
 
                 # 成就界面全部领取
                 claim_all = res_map.get("claim_all.png")
                 if claim_all:
-                    log.info("[逻辑] 全部领取", claim_all)
+                    log.info("[逻辑] 全部领取 %s", item_to_str(claim_all))
                     self.maybe_click(claim_all)
                     continue
 

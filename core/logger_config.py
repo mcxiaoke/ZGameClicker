@@ -22,7 +22,7 @@ def setup_logger(debug_mode: bool = False):
     # 根据开关选择日志格式
     if SHOW_DATETIME:
         # 包含日期时间
-        log_format = "%(asctime)s|[%(levelname).1s]%(name)s: %(message)s"
+        log_format = "%(asctime)s|%(levelname).1s %(name)s: %(message)s"
         date_format = "%H:%M:%S"
     else:
         # 不包含日期时间，级别使用首字母缩写
