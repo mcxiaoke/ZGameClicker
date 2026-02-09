@@ -52,8 +52,26 @@ class GameController:
         self.executor = ThreadPoolExecutor(max_workers=8)
 
     def __del__(self):
-        if hasattr(self, "executor"):
-            self.executor.shutdown(wait=False)
+        self.shutdown(wait=False)
+
+    def shutdown(self, wait=False):
+        """Gracefully shutdown resources: thread pool and capture object."""
+        if hasattr(self, "executor") and self.executor is not None:
+            try:
+                self.executor.shutdown(wait=wait)
+            except Exception:
+                pass
+            finally:
+                self.executor = None
+
+        if hasattr(self, "sct") and self.sct is not None:
+            try:
+                # mss.MSS objects provide a close method
+                self.sct.close()
+            except Exception:
+                pass
+            finally:
+                self.sct = None
 
     def set_regions(self, regions_dict):
         self.regions = regions_dict

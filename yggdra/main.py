@@ -31,6 +31,7 @@ class YggdraBot:
         )
         self.bot.set_regions(config.REGIONS)
         self.bot.set_disable_click(opts.disable_click)
+        self.last_frame_time = 0
         # 预加载所有要查找的文件名列表 (排除 404 的)
         self.targets = [k for k, v in ASSETS.items() if "404" not in v["desc"]]
         # for k, v in ASSETS.items():
@@ -69,10 +70,18 @@ class YggdraBot:
         frame_count = 0
         battle_count = 0
         battle_last_at = 0
+        last_frame_time = time.time()
         try:
             while True:
                 # 操作之间间隔时间，防止重复点击
-                time.sleep(1)
+                elapsed = time.time() - self.last_frame_time
+                if elapsed < 1:
+                    debug(
+                        f"Frame #{frame_count} - Waiting for {round(1 - elapsed, 2)}s"
+                    )
+                    time.sleep(1 - elapsed)  # 保持每秒至少 1 帧
+                self.last_frame_time = time.time()
+
                 # 一次性批量查找所有目标并构建索引表
                 screen, res_map, results = self._capture_and_build_res_map()
                 if screen is None:
@@ -81,7 +90,6 @@ class YggdraBot:
                     continue
 
                 frame_count += 1
-                log.debug("Frame #%d captured", frame_count)
 
                 # 战斗界面，跳过其它检测
                 wave = res_map.get("wave.png")
@@ -265,6 +273,7 @@ class YggdraBot:
 
         except KeyboardInterrupt:
             log.info("Bot stopped.")
+            self.bot.shutdown(wait=False)
 
 
 def run():
