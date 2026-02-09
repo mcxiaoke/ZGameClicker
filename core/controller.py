@@ -74,6 +74,8 @@ class GameController:
         self.last_win_rect = self.win_mgr.get_rect()
         left, top, w, h = self.last_win_rect
 
+        debug(f"Window Rect: {self.last_win_rect} ")
+
         try:
             if self.method == self.METHOD_BITBLT and HAS_BITBLT:
                 hwnd = self.win_mgr.get_hwnd()
@@ -264,10 +266,12 @@ class GameController:
             return
 
         pos = None
-        name = "Unknown"
+        name = "POS"
         if isinstance(target, dict):
             pos = target.get("pos")
             name = target.get("name")
+        elif isinstance(target, tuple) and len(target) == 2:
+            pos = target
 
         target_x = pos[0] + offset[0]
         target_y = pos[1] + offset[1]

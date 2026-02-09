@@ -70,4 +70,5 @@ REGIONS = {
     "skip_confirm_ok.png": (1595, 1099, 209, 156),
     "stage_reward.png": (708, 730, 241, 136),
     "stage_extra_reward.png": (710, 969, 241, 140),
+    "team_power.png": (1711, 623, 264, 144),
 }

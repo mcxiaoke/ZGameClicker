@@ -88,7 +88,7 @@ class YggdraBot:
                 action_count = res_map.get("action_count.png")
                 if wave and action_count:
                     log.debug("[UI] 战斗中，跳过其它检测")
-                    time.sleep(2)
+                    time.sleep(1)
                     continue
 
                 # 简化业务逻辑示例
@@ -99,13 +99,25 @@ class YggdraBot:
                     time.sleep(0.5)  # 等界面切换
                     # 不跳过，继续下面的逻辑
 
-                battle_prepare = res_map.get("battle_prepare.png") or res_map.get(
-                    "battle_prepare2.png"
+                # 关卡信息界面
+                battle_info = res_map.get("award_text.png") and res_map.get(
+                    "team_power.png"
                 )
-                if battle_prepare:
-                    log.info("[逻辑] 战斗准备 %s", item_to_str(battle_prepare))
-                    self.maybe_click(battle_prepare)
-                    continue
+                if battle_info:
+                    # 战斗快速开始，固定队伍
+                    battle_quick = res_map.get("battle_start_quick.png")
+                    if battle_quick:
+                        log.info("[逻辑] 战斗快速开始 %s", item_to_str(battle_quick))
+                        self.maybe_click(battle_quick)
+                        continue
+                    # 点击准备画面
+                    battle_prepare = res_map.get("battle_prepare.png") or res_map.get(
+                        "battle_prepare2.png"
+                    )
+                    if battle_prepare:
+                        log.info("[逻辑] 战斗准备 %s", item_to_str(battle_prepare))
+                        self.maybe_click(battle_prepare)
+                        continue
 
                 battle_start = res_map.get("battle_start.png")
                 if battle_start:
@@ -119,8 +131,12 @@ class YggdraBot:
                     continue
 
                 # 关卡通关界面
-                battle_win = res_map.get("win.png") and res_map.get("stage_reward.png")
+                battle_win = res_map.get("win.png")
                 if battle_win:
+                    if not res_map.get("stage_reward.png"):
+                        # 通关界面正在显示动画
+                        self.bot.click(target=(1200, 1400))
+                        continue
                     current_time = time.time()
                     elapsed = (
                         (current_time - battle_last_at) if battle_last_at > 0 else 0
@@ -158,13 +174,6 @@ class YggdraBot:
                     "chapter_arrow.png"
                 )
                 if chapter_select:
-                    log.info("[UI] 关卡选择界面")
-                    # 战斗快速开始，固定队伍
-                    battle_quick = res_map.get("battle_start_quick.png")
-                    if battle_quick:
-                        log.info("[逻辑] 战斗快速开始 %s", item_to_str(battle_quick))
-                        self.maybe_click(battle_quick)
-                        continue
                     # 选择置信度最高的头像候选
                     avatar_candidates = [
                         res_map.get(n)
@@ -184,6 +193,7 @@ class YggdraBot:
                         else None
                     )
                     if avatar:
+                        log.info("[UI] 关卡选择界面")
                         log.info(
                             "[逻辑] 进入关卡 %s",
                             item_to_str(avatar),
@@ -251,35 +261,6 @@ class YggdraBot:
                 if claim_all:
                     log.info("[逻辑] 全部领取 %s", item_to_str(claim_all))
                     self.maybe_click(claim_all)
-                    continue
-
-                # 装备强化界面，先点击选择，再点击强化，最后关闭界面
-                equip_select = res_map.get("equip_select.png")
-                if equip_select:
-                    log.info("[逻辑] 装备强化界面，自动选择")
-                    self.maybe_click(equip_select)
-                    time.sleep(0.5)
-                    # 刷新截图，找强化按钮
-                    screen, res_map, results = self._capture_and_build_res_map()
-                    if screen is None:
-                        continue
-                    equip_enforce = res_map.get("equip_enforce.png")
-                    if equip_enforce:
-                        log.info("[逻辑] 装备强化界面，点击强化")
-                        self.maybe_click(equip_enforce)
-                    back = res_map.get("back.png")
-                    if back:
-                        log.info("[逻辑] 装备强化界面，点击返回")
-                        self.maybe_click(back)
-                    time.sleep(0.5)
-                    # 刷新截图，找关闭按钮
-                    screen, results, res_map = self._capture_and_build_res_map()
-                    if screen is None:
-                        continue
-                    close = res_map.get("close.png")
-                    if close:
-                        log.info("[逻辑] 装备强化界面，点击关闭")
-                        self.maybe_click(close)
                     continue
 
         except KeyboardInterrupt:

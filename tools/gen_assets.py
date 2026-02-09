@@ -101,8 +101,7 @@ def run_gen(game_name):
         val_str = (
             f'{{"name": "{val["name"]}", '
             f'"desc": "{val["desc"]}", '
-            f'"type": "{val.get("type", "button")}", '
-            f'"click": "{val.get("click", "single")}"}}'
+            f'"click": {val.get("click", 1)}}}'
         )
         lines.append(f'    "{key}": {val_str},')
 
